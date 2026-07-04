@@ -1,9 +1,38 @@
+# dependencies
 node_modules
+
+# Next.js
 .next
+out
+
+# production
+build
 dist
 coverage
+
+# environment variables
 .env
 .env.local
+.env.*.local
+
+# local databases
 *.db
 *.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 work/npm-cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea

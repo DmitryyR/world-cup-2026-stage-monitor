@@ -10,7 +10,7 @@ The app is intentionally compact. Its main purpose is to demonstrate Agentic Eng
 - TypeScript
 - Tailwind CSS
 - Prisma
-- SQLite
+- PostgreSQL
 - Zod
 - Vitest
 
@@ -50,6 +50,8 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Set `DATABASE_URL` to a local or hosted Postgres database before running migrations.
+
 The main free provider for current World Cup 2026 data is `worldcup26`, backed by the community/open-source `worldcup26.ir` API. It does not require an API key.
 
 ```env
@@ -66,7 +68,7 @@ For deterministic offline development, use:
 DATA_PROVIDER=mock
 ```
 
-The local SQLite database lives at `prisma/dev.db` when `DATABASE_URL="file:./dev.db"`.
+The production database is PostgreSQL. Local development should use the same Postgres-backed Prisma schema.
 
 ## Commands
 
@@ -80,6 +82,43 @@ npm run prisma:migrate
 npm run prisma:studio
 npm run monitor
 ```
+
+## Vercel Deployment
+
+This project is ready to deploy from GitHub to Vercel with a production PostgreSQL database.
+
+### GitHub
+
+1. Commit the project, including `prisma/schema.prisma`, `prisma/migrations/**`, `package.json`, `package-lock.json`, and this README.
+2. Push the branch to GitHub.
+
+### Vercel Import
+
+1. In Vercel, create a new project from the GitHub repository.
+2. Keep the framework preset as Next.js.
+3. Set the build command to:
+
+```bash
+npm run vercel-build
+```
+
+4. Add a Postgres database from the Vercel Marketplace or attach an existing Postgres provider.
+5. Ensure the database integration exposes a production `DATABASE_URL`.
+6. Add the environment variables below.
+7. Deploy.
+
+### Vercel Environment Variables
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+DATA_PROVIDER="worldcup26"
+WORLDCUP26_BASE_URL="https://worldcup26.ir"
+API_REQUEST_TIMEOUT_MS="10000"
+```
+
+### First Production Run
+
+After the first deploy, open the production site and click **Run Monitor**. That calls the existing monitor route, fetches `worldcup26` data, validates it through the checker, persists accepted `Match`, `TournamentState`, and `AgentRun` rows, and populates the dashboard.
 
 ## API Routes
 
@@ -135,4 +174,4 @@ npm run test
 - `docs/DEMO_SCRIPT.md`
 - `docs/ADR-001-real-data-provider.md`
 
-Note: the PRD model includes `rawPayload Json?`, but this local SQLite MVP stores raw provider payloads as serialized text in Prisma for smoother local portability.
+Note: `rawPayload` remains serialized text for portability and auditability. Runtime tournament data is persisted in Postgres for production deployments.
