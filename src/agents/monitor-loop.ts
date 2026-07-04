@@ -148,6 +148,7 @@ export async function runMonitorWithPayload(
 ): Promise<MonitorLoopResult> {
   return runMonitorLoop({
     provider: {
+      name: payload.source,
       source: payload.source,
       async fetchTournamentData() {
         return payload;

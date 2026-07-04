@@ -6,14 +6,14 @@ type DetectOptions = {
   previousStage?: TournamentStage | null;
 };
 
-const activeStagePriority: TournamentStage[] = [
-  "final",
-  "third_place",
-  "semi_final",
-  "quarter_final",
-  "round_of_16",
-  "round_of_32",
+const unresolvedStagePriority: TournamentStage[] = [
   "group_stage",
+  "round_of_32",
+  "round_of_16",
+  "quarter_final",
+  "semi_final",
+  "third_place",
+  "final",
 ];
 
 export function detectTournamentState(
@@ -54,18 +54,14 @@ function detectCurrentStage(
     return "completed";
   }
 
-  if (finalMatch) {
-    return "final";
-  }
-
-  for (const stage of activeStagePriority.slice(1)) {
-    const hasActiveMatch = matches.some(
+  for (const stage of unresolvedStagePriority) {
+    const hasUnresolvedMatch = matches.some(
       (match) =>
         match.stage === stage &&
         (match.status === "scheduled" || match.status === "live"),
     );
 
-    if (hasActiveMatch) {
+    if (hasUnresolvedMatch) {
       return stage;
     }
   }

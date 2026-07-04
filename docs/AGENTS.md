@@ -13,6 +13,7 @@ Responsibilities:
 - Select the configured provider.
 - Fetch raw tournament data.
 - Return source metadata.
+- Fail clearly when a real provider is misconfigured or unavailable.
 
 Forbidden:
 
@@ -95,3 +96,5 @@ The checker must reject:
 - Add tests before changing core tournament rules.
 - Prefer small functions with explicit inputs and outputs.
 - UI must not be created before stage detector and checker tests exist.
+- UI must not call external sports APIs directly.
+- Provider-specific mapping belongs in `src/providers`, not in shared checker logic.

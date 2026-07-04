@@ -50,7 +50,23 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-The mock provider works without external API keys. The local SQLite database lives at `prisma/dev.db` when `DATABASE_URL="file:./dev.db"`.
+The main free provider for current World Cup 2026 data is `worldcup26`, backed by the community/open-source `worldcup26.ir` API. It does not require an API key.
+
+```env
+DATA_PROVIDER=worldcup26
+WORLDCUP26_BASE_URL=https://worldcup26.ir
+API_REQUEST_TIMEOUT_MS=10000
+```
+
+API-Football remains available for historical provider smoke testing, for example `season=2022`, if you have an API key.
+
+For deterministic offline development, use:
+
+```env
+DATA_PROVIDER=mock
+```
+
+The local SQLite database lives at `prisma/dev.db` when `DATABASE_URL="file:./dev.db"`.
 
 ## Commands
 
@@ -112,9 +128,11 @@ npm run test
 ## Documentation
 
 - `docs/PRD.md`
+- `docs/PRD-v2.md`
 - `docs/SDD.md`
 - `docs/AGENTS.md`
 - `docs/EVALS.md`
 - `docs/DEMO_SCRIPT.md`
+- `docs/ADR-001-real-data-provider.md`
 
 Note: the PRD model includes `rawPayload Json?`, but this local SQLite MVP stores raw provider payloads as serialized text in Prisma for smoother local portability.

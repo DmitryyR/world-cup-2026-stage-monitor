@@ -59,6 +59,45 @@ describe("detectTournamentState", () => {
     expect(state.champion).toBeNull();
   });
 
+  it("uses earliest unresolved stage when full future schedule exists", () => {
+    const state = detectTournamentState([
+      makeCompletedPriorStage("round_of_32"),
+      makeMatch({
+        externalId: "r16-finished",
+        stage: "round_of_16",
+        status: "finished",
+      }),
+      makeMatch({ externalId: "r16-scheduled-1", stage: "round_of_16" }),
+      makeMatch({ externalId: "r16-scheduled-2", stage: "round_of_16" }),
+      makeMatch({ externalId: "qf-future", stage: "quarter_final" }),
+      makeMatch({ externalId: "sf-future", stage: "semi_final" }),
+      makeMatch({ externalId: "final-future", stage: "final" }),
+    ]);
+
+    expect(state.currentStage).toBe("round_of_16");
+  });
+
+  it("detects quarter-final when only quarter-finals and later are unresolved", () => {
+    const state = detectTournamentState([
+      makeCompletedPriorStage("round_of_16"),
+      makeMatch({ externalId: "qf-future", stage: "quarter_final" }),
+      makeMatch({ externalId: "sf-future", stage: "semi_final" }),
+      makeMatch({ externalId: "final-future", stage: "final" }),
+    ]);
+
+    expect(state.currentStage).toBe("quarter_final");
+  });
+
+  it("detects semi-final when only semi-finals and later are unresolved", () => {
+    const state = detectTournamentState([
+      makeCompletedPriorStage("quarter_final"),
+      makeMatch({ externalId: "sf-future", stage: "semi_final" }),
+      makeMatch({ externalId: "final-future", stage: "final" }),
+    ]);
+
+    expect(state.currentStage).toBe("semi_final");
+  });
+
   it("detects completed tournament when final is finished with winner", () => {
     const state = detectTournamentState([
       makeMatch({

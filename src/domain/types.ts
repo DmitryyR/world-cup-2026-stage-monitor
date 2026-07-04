@@ -59,6 +59,7 @@ export type RawProviderPayload = {
   source: string;
   fetchedAt: string;
   matches: RawProviderMatch[];
+  rawProviderPayload?: unknown;
 };
 
 export type AgentRunRecord = {

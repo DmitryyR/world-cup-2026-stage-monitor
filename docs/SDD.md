@@ -56,9 +56,13 @@ group_stage < round_of_32 < round_of_16 < quarter_final < semi_final < third_pla
 
 ## Provider Strategy
 
-The MVP ships with `MockProvider`. It reads local sample data and allows demos, tests, and development without API keys.
+The app now uses a real-data-first provider strategy. `WorldCup26Provider` is the primary free provider for current World Cup 2026 data and reads games from `worldcup26.ir/get/games` without an API key.
 
-Future providers can implement the same `TournamentDataProvider` interface and return raw provider payloads. Normalization remains provider-aware, while downstream domain logic stays provider-agnostic.
+`ApiFootballProvider` remains available for historical provider smoke testing, such as `season=2022`, when an API key is available. `MockProvider` remains available for tests, evals, offline demos, and deterministic local development.
+
+Providers implement the same `TournamentDataProvider` interface and return raw provider payloads. Provider response validation and mapping are provider-specific; downstream domain logic remains provider-agnostic.
+
+Unknown provider statuses or rounds fail the monitor run and are logged instead of being published.
 
 ## Failure Handling
 

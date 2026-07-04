@@ -52,4 +52,5 @@ export const rawProviderPayloadSchema = z.object({
   source: z.string().min(1),
   fetchedAt: z.string().datetime(),
   matches: z.array(rawProviderMatchSchema),
+  rawProviderPayload: z.unknown().optional(),
 });

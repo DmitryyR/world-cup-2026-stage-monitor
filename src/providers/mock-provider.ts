@@ -4,6 +4,7 @@ import type { RawProviderPayload } from "@/domain/types";
 import type { TournamentDataProvider } from "./provider";
 
 export class MockProvider implements TournamentDataProvider {
+  readonly name = "mock";
   readonly source = "mock";
 
   async fetchTournamentData(): Promise<RawProviderPayload> {
