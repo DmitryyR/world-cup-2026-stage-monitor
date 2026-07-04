@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 30rem),
-    #f7f8fa;
-  color: #121417;
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.2), transparent 32rem),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28rem),
+    linear-gradient(135deg, #020617 0%, #071426 48%, #020617 100%);
+  color: #e5edf8;
   font-family:
     Arial,
     Helvetica,

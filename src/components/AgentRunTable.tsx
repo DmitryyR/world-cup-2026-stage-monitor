@@ -1,73 +1,105 @@
+"use client";
+
+import { useState } from "react";
 import type { AgentRunRecord } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
+import { StatusBadge } from "./StatusBadge";
 
 type AgentRunTableProps = {
   runs: AgentRunRecord[];
 };
 
 export function AgentRunTable({ runs }: AgentRunTableProps) {
+  const [showPreviousRuns, setShowPreviousRuns] = useState(false);
+  const latestRun = runs[0] ?? null;
+  const previousRuns = runs.slice(1);
+
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Started (Kyiv time)</th>
-              <th className="px-4 py-3">Finished (Kyiv time)</th>
-              <th className="px-4 py-3">Source</th>
-              <th className="px-4 py-3">Changes</th>
-              <th className="px-4 py-3">Checker</th>
-              <th className="px-4 py-3">Stage</th>
-              <th className="px-4 py-3">Error</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {runs.map((run) => (
-              <tr key={run.id} className="hover:bg-emerald-50/40">
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {formatKyivDateTime(run.startedAt)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {run.finishedAt ? formatKyivDateTime(run.finishedAt) : "-"}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
-                    {run.source}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {run.changesDetected}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <span
-                    className={
-                      run.checkerResult === "passed"
-                        ? "rounded-md bg-emerald-100 px-2 py-1 font-semibold text-emerald-800"
-                        : "rounded-md bg-rose-100 px-2 py-1 font-semibold text-rose-800"
-                    }
-                  >
-                    {run.checkerResult}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {run.detectedStage ? formatStage(run.detectedStage) : "-"}
-                </td>
-                <td className="max-w-xs px-4 py-3 text-slate-600">
-                  {run.errorMessage ?? "-"}
-                </td>
-              </tr>
-            ))}
-            {runs.length === 0 ? (
-              <tr>
-                <td className="px-4 py-8 text-center text-slate-500" colSpan={7}>
-                  No monitor runs yet.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+    <section className="space-y-4">
+      <div className="rounded-lg border border-white/10 bg-slate-900/75 p-5 shadow-xl shadow-black/20">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-black uppercase text-slate-100">Latest run</h2>
+          {latestRun ? <StatusBadge status={latestRun.checkerResult} /> : null}
+        </div>
+        {latestRun ? (
+          <RunDetails run={latestRun} />
+        ) : (
+          <p className="mt-4 text-sm text-slate-400">No monitor runs yet.</p>
+        )}
       </div>
+
+      {previousRuns.length > 0 ? (
+        <div className="rounded-lg border border-white/10 bg-slate-950/50 p-4">
+          <button
+            className="flex w-full items-center justify-between text-left text-sm font-semibold text-slate-200"
+            onClick={() => setShowPreviousRuns((value) => !value)}
+            type="button"
+          >
+            Show previous runs ({previousRuns.length})
+            <span className="text-slate-400">{showPreviousRuns ? "Hide" : "Open"}</span>
+          </button>
+          {showPreviousRuns ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10 text-sm">
+                <thead className="text-left text-xs uppercase text-slate-400">
+                  <tr>
+                    <th className="px-3 py-2">Started</th>
+                    <th className="px-3 py-2">Checker</th>
+                    <th className="px-3 py-2">Stage</th>
+                    <th className="px-3 py-2">Changes</th>
+                    <th className="px-3 py-2">Error</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {previousRuns.map((run) => (
+                    <tr key={run.id}>
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-300">
+                        {formatKyivDateTime(run.startedAt)}
+                      </td>
+                      <td className="px-3 py-2">
+                        <StatusBadge status={run.checkerResult} />
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-300">
+                        {run.detectedStage ? formatStage(run.detectedStage) : "-"}
+                      </td>
+                      <td className="px-3 py-2 text-slate-300">{run.changesDetected}</td>
+                      <td className="max-w-xs px-3 py-2 text-slate-400">
+                        {run.errorMessage ?? "-"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function RunDetails({ run }: { run: AgentRunRecord }) {
+  return (
+    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+      <RunRow label="Started" value={`${formatKyivDateTime(run.startedAt)} Kyiv time`} />
+      <RunRow
+        label="Finished"
+        value={run.finishedAt ? `${formatKyivDateTime(run.finishedAt)} Kyiv time` : "-"}
+      />
+      <RunRow label="Source" value={run.source} />
+      <RunRow label="Stage" value={run.detectedStage ? formatStage(run.detectedStage) : "-"} />
+      <RunRow label="Changes" value={String(run.changesDetected)} />
+      <RunRow label="Error" value={run.errorMessage ?? "-"} />
+    </dl>
+  );
+}
+
+function RunRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-bold uppercase text-slate-500">{label}</dt>
+      <dd className="mt-1 font-semibold text-slate-200">{value}</dd>
     </div>
   );
 }

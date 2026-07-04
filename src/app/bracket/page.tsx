@@ -1,41 +1,99 @@
-import { TournamentPath } from "@/components/TournamentPath";
-import { buildTournamentPath } from "@/lib/tournament-path";
+import { BracketBoard } from "@/components/BracketBoard";
+import { DataHealthCard } from "@/components/DataHealthCard";
+import { TeamName } from "@/components/TeamName";
+import { TeamPathCard } from "@/components/TeamPathCard";
+import { TopMetricCard } from "@/components/TopMetricCard";
+import { formatKyivDateTime } from "@/lib/date-format";
+import { formatStage } from "@/lib/format";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
 export const dynamic = "force-dynamic";
 
 export default async function BracketPage() {
   const repository = new PrismaTournamentRepository();
-  const [matches, state] = await Promise.all([
+  const [matches, state, runs] = await Promise.all([
     repository.getMatches(),
     repository.getLatestState(),
+    repository.getAgentRuns(),
   ]);
-  const pathStages = buildTournamentPath(matches, state);
+  const totalMatches = matches.length;
+  const completedMatches = state?.completedMatches ?? 0;
+  const progressPercent =
+    totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
+  const liveMatch = matches.find((match) => match.status === "live") ?? null;
+  const nextMatch =
+    matches
+      .filter((match) => match.status === "scheduled")
+      .sort((first, second) => first.kickoffAt.localeCompare(second.kickoffAt))[0] ??
+    null;
+  const latestAcceptedRun =
+    runs.find((run) => run.checkerResult === "passed") ?? null;
 
   return (
-    <div className="space-y-7">
-      <section className="relative overflow-hidden rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div
-          className="absolute inset-0 opacity-80"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 12% 20%, rgba(16,185,129,.16), transparent 25%), radial-gradient(circle at 84% 12%, rgba(124,58,237,.14), transparent 28%)",
-          }}
+    <div className="space-y-5">
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <TopMetricCard
+          detail={
+            <div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-emerald-400"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="mt-2">{completedMatches} matches completed</div>
+            </div>
+          }
+          label="Tournament Progress"
+          value={`${completedMatches} / ${totalMatches || 0}`}
         />
-        <div className="relative">
-          <div className="text-xs font-black uppercase tracking-normal text-emerald-700">
-            Tournament Path
-          </div>
-          <h1 className="mt-2 text-6xl font-black tracking-normal text-slate-950 sm:text-7xl">
-            48 {"\u2192"} 1
-          </h1>
-          <p className="mt-3 text-base font-medium text-slate-500">
-            World Cup 2026 progression
-          </p>
-        </div>
+        <TopMetricCard
+          detail={`${state?.remainingMatches ?? 0} matches remaining`}
+          label="Current Stage"
+          value={state ? formatStage(state.currentStage) : "Not run"}
+        />
+        <TopMetricCard
+          accent={liveMatch ? "red" : "blue"}
+          detail={
+            liveMatch ? (
+              <TeamLine match={liveMatch} />
+            ) : (
+              "No accepted live match"
+            )
+          }
+          label="Live Now"
+          value={liveMatch ? "Live" : "Idle"}
+        />
+        <TopMetricCard
+          accent="blue"
+          detail={nextMatch ? <TeamLine match={nextMatch} /> : "No scheduled match"}
+          label="Next Match"
+          value={nextMatch ? formatKyivDateTime(nextMatch.kickoffAt) : "-"}
+        />
+        <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
       </section>
 
-      <TournamentPath stages={pathStages} />
+      <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
+        <BracketBoard matches={matches} />
+        <div className="space-y-4">
+          <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
+          <TeamPathCard matches={matches} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeamLine({
+  match,
+}: {
+  match: { homeTeam: string; awayTeam: string };
+}) {
+  return (
+    <div className="flex items-center gap-2 text-slate-100">
+      <TeamName teamName={match.homeTeam} />
+      <span className="text-slate-500">vs</span>
+      <TeamName teamName={match.awayTeam} />
     </div>
   );
 }

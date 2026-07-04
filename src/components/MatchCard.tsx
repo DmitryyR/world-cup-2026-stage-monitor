@@ -1,9 +1,10 @@
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
+import { getDisplayMatchStatus } from "@/lib/knockout-display";
 import { getTeamDisplayName } from "@/lib/team-flags";
-import { StageBadge } from "./StageBadge";
-import { TeamDisplay } from "./TeamDisplay";
+import { StatusBadge } from "./StatusBadge";
+import { TeamName } from "./TeamName";
 
 type MatchCardProps = {
   match: NormalizedMatch;
@@ -11,37 +12,32 @@ type MatchCardProps = {
 
 export function MatchCard({ match }: MatchCardProps) {
   const isFinished = match.status === "finished";
+  const status = getDisplayMatchStatus(match);
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded-lg border border-white/10 bg-slate-900/75 p-5 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-blue-400/40">
       <div className="flex items-center justify-between gap-3">
-        <StageBadge stage={match.stage} />
-        <span
-          className={
-            isFinished
-              ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold capitalize text-emerald-700"
-              : "rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold capitalize text-blue-700"
-          }
-        >
-          {match.status}
+        <span className="rounded-md bg-white/5 px-2.5 py-1 text-xs font-black uppercase text-slate-300">
+          {formatStage(match.stage)}
         </span>
+        <StatusBadge status={status} />
       </div>
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <TeamDisplay teamName={match.homeTeam} />
+        <TeamName teamName={match.homeTeam} />
         <span
           className={
             isFinished
-              ? "rounded-md bg-slate-100 px-4 py-2 text-xl font-black text-slate-950"
-              : "rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-500"
+              ? "rounded-md bg-white/10 px-4 py-2 text-xl font-black text-slate-50"
+              : "rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-bold text-slate-400"
           }
         >
           {isFinished ? formatScore(match) : "VS"}
         </span>
-        <TeamDisplay align="right" teamName={match.awayTeam} />
+        <TeamName align="right" teamName={match.awayTeam} />
       </div>
-      <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm text-slate-500">
+      <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm text-slate-400">
         <span>{formatKyivDateTime(match.kickoffAt)} Kyiv time</span>
-        <span className={match.winner ? "font-semibold text-emerald-700" : ""}>
+        <span className={match.winner ? "font-semibold text-emerald-300" : ""}>
           {match.winner
             ? `Winner: ${getTeamDisplayName(match.winner)}`
             : formatStage(match.stage)}

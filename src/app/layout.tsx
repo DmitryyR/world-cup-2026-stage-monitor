@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, CalendarDays, LayoutDashboard, ListChecks, Trophy } from "lucide-react";
+import {
+  Activity,
+  CalendarDays,
+  LayoutDashboard,
+  ListChecks,
+  Trophy,
+  Users,
+} from "lucide-react";
 import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 
@@ -11,9 +18,10 @@ export const metadata: Metadata = {
 
 const navItems = [
   { href: "/", label: "Summary", icon: LayoutDashboard },
+  { href: "/bracket", label: "Bracket", icon: Activity },
   { href: "/matches", label: "Matches", icon: CalendarDays },
-  { href: "/bracket", label: "Tournament Path", icon: Activity },
   { href: "/agent-log", label: "Agent Log", icon: ListChecks },
+  { href: "/bracket", label: "Teams", icon: Users },
 ];
 
 export default function RootLayout({
@@ -24,41 +32,49 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="relative border-b border-slate-200 bg-white shadow-sm">
-          <div className="absolute left-0 top-0 hidden h-full w-10 bg-emerald-700 sm:block" />
-          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+          <aside className="border-b border-white/10 bg-slate-950/70 p-4 backdrop-blur lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
             <Link href="/" className="flex items-center gap-3">
-              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
-                <Trophy aria-hidden="true" size={24} />
+              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500/15 text-amber-300 ring-1 ring-amber-300/30">
+                <Trophy aria-hidden="true" size={28} />
               </span>
               <span>
-                <span className="block text-xl font-black text-slate-950">
-                  World Cup 2026 Stage Monitor
+                <span className="block text-xl font-black uppercase leading-none tracking-normal text-slate-50">
+                  World Cup 2026
                 </span>
-                <span className="block text-sm text-slate-500">
-                  Maker/checker tournament state
+                <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Stage Monitor
                 </span>
               </span>
             </Link>
-            <nav className="flex flex-wrap gap-2">
+
+            <nav className="mt-7 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
               {navItems.map((item) => {
                 const Icon = item.icon;
 
                 return (
                   <Link
-                    key={item.href}
+                    key={`${item.href}-${item.label}`}
                     href={item.href}
-                    className="inline-flex h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
+                    className="inline-flex h-11 shrink-0 items-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-semibold text-slate-300 hover:border-blue-400/40 hover:bg-blue-500/15 hover:text-blue-100"
                   >
-                    <Icon aria-hidden="true" size={16} />
+                    <Icon aria-hidden="true" size={17} />
                     {item.label}
                   </Link>
                 );
               })}
             </nav>
-          </div>
-        </header>
-        <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
+
+            <div className="mt-8 hidden text-xs text-slate-500 lg:block">
+              <div>Kyiv time</div>
+              <div>Europe/Kyiv</div>
+            </div>
+          </aside>
+
+          <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-5">
+            <div className="mx-auto max-w-[1600px]">{children}</div>
+          </main>
+        </div>
       </body>
     </html>
   );

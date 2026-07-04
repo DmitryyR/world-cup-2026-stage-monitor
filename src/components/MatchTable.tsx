@@ -1,8 +1,10 @@
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
+import { getDisplayMatchStatus } from "@/lib/knockout-display";
 import { getTeamDisplayName } from "@/lib/team-flags";
-import { TeamDisplay } from "./TeamDisplay";
+import { StatusBadge } from "./StatusBadge";
+import { TeamName } from "./TeamName";
 
 type MatchTableProps = {
   matches: NormalizedMatch[];
@@ -10,10 +12,10 @@ type MatchTableProps = {
 
 export function MatchTable({ matches }: MatchTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-xl shadow-black/20">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
+        <table className="min-w-full divide-y divide-white/10 text-sm">
+          <thead className="bg-white/[0.03] text-left text-xs font-semibold uppercase tracking-normal text-slate-400">
             <tr>
               <th className="px-4 py-3">Date (Kyiv time)</th>
               <th className="px-4 py-3">Stage</th>
@@ -23,37 +25,29 @@ export function MatchTable({ matches }: MatchTableProps) {
               <th className="px-4 py-3">Winner</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-white/10">
             {matches.map((match) => (
-              <tr key={match.externalId} className="hover:bg-emerald-50/40">
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+              <tr key={match.externalId} className="hover:bg-white/[0.03]">
+                <td className="whitespace-nowrap px-4 py-3 text-slate-300">
                   {formatKyivDateTime(match.kickoffAt)}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-800">
+                <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-200">
                   {formatStage(match.stage)}
                 </td>
-                <td className="px-4 py-3 text-slate-950">
+                <td className="px-4 py-3">
                   <span className="flex min-w-64 items-center gap-3">
-                    <TeamDisplay teamName={match.homeTeam} variant="compact" />
-                    <span className="text-slate-400">vs</span>
-                    <TeamDisplay teamName={match.awayTeam} variant="compact" />
+                    <TeamName teamName={match.homeTeam} />
+                    <span className="text-slate-500">vs</span>
+                    <TeamName teamName={match.awayTeam} />
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 font-semibold">
+                <td className="whitespace-nowrap px-4 py-3 font-semibold text-slate-100">
                   {formatScore(match)}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 capitalize">
-                  <span
-                    className={
-                      match.status === "finished"
-                        ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700"
-                        : "rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700"
-                    }
-                  >
-                    {match.status}
-                  </span>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <StatusBadge status={getDisplayMatchStatus(match)} />
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+                <td className="whitespace-nowrap px-4 py-3 text-slate-300">
                   {match.winner ? getTeamDisplayName(match.winner) : "-"}
                 </td>
               </tr>
