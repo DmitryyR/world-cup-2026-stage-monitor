@@ -1,5 +1,6 @@
 import type { NormalizedMatch } from "@/domain/types";
-import { formatDateTime, formatScore, formatStage } from "@/lib/format";
+import { formatKyivDateTime } from "@/lib/date-format";
+import { formatScore, formatStage } from "@/lib/format";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { StageBadge } from "./StageBadge";
 import { TeamDisplay } from "./TeamDisplay";
@@ -39,7 +40,7 @@ export function MatchCard({ match }: MatchCardProps) {
         <TeamDisplay align="right" teamName={match.awayTeam} />
       </div>
       <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm text-slate-500">
-        <span>{formatDateTime(match.kickoffAt)}</span>
+        <span>{formatKyivDateTime(match.kickoffAt)} Kyiv time</span>
         <span className={match.winner ? "font-semibold text-emerald-700" : ""}>
           {match.winner
             ? `Winner: ${getTeamDisplayName(match.winner)}`

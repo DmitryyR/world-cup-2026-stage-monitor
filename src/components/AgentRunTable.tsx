@@ -1,5 +1,6 @@
 import type { AgentRunRecord } from "@/domain/types";
-import { formatDateTime, formatStage } from "@/lib/format";
+import { formatKyivDateTime } from "@/lib/date-format";
+import { formatStage } from "@/lib/format";
 
 type AgentRunTableProps = {
   runs: AgentRunRecord[];
@@ -12,8 +13,8 @@ export function AgentRunTable({ runs }: AgentRunTableProps) {
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
             <tr>
-              <th className="px-4 py-3">Started</th>
-              <th className="px-4 py-3">Finished</th>
+              <th className="px-4 py-3">Started (Kyiv time)</th>
+              <th className="px-4 py-3">Finished (Kyiv time)</th>
               <th className="px-4 py-3">Source</th>
               <th className="px-4 py-3">Changes</th>
               <th className="px-4 py-3">Checker</th>
@@ -25,10 +26,10 @@ export function AgentRunTable({ runs }: AgentRunTableProps) {
             {runs.map((run) => (
               <tr key={run.id} className="hover:bg-emerald-50/40">
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {formatDateTime(run.startedAt)}
+                  {formatKyivDateTime(run.startedAt)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {run.finishedAt ? formatDateTime(run.finishedAt) : "-"}
+                  {run.finishedAt ? formatKyivDateTime(run.finishedAt) : "-"}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">

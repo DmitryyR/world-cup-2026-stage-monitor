@@ -1,6 +1,6 @@
 import { CalendarClock, CheckCircle2, CircleDashed, Trophy } from "lucide-react";
 import type { TournamentState } from "@/domain/types";
-import { formatDateTime } from "@/lib/format";
+import { formatKyivDateTime } from "@/lib/date-format";
 import { getTeamDisplayName } from "@/lib/team-flags";
 
 type TournamentSummaryProps = {
@@ -36,7 +36,8 @@ export function TournamentSummary({ state }: TournamentSummaryProps) {
     },
     {
       label: "Last Check",
-      value: state ? formatDateTime(state.lastCheckedAt) : "Not run",
+      value: state ? formatKyivDateTime(state.lastCheckedAt) : "Not run",
+      sublabel: state ? "Kyiv time" : undefined,
       icon: CalendarClock,
       tone: "violet",
     },
@@ -67,9 +68,10 @@ export function TournamentSummary({ state }: TournamentSummaryProps) {
                   <div className="mt-1 text-3xl font-bold text-slate-950">
                     {metric.value}
                   </div>
-                  {metric.label === "Champion" ? (
+                  {metric.label === "Champion" || metric.sublabel ? (
                     <div className="text-sm text-slate-500">
-                      {state?.champion ? "Winner" : "Pending"}
+                      {metric.sublabel ??
+                        (state?.champion ? "Winner" : "Pending")}
                     </div>
                   ) : null}
                 </div>

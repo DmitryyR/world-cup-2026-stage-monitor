@@ -1,4 +1,5 @@
 import type { NormalizedMatch, TournamentStage } from "@/domain/types";
+import { formatKyivDateTime } from "@/lib/date-format";
 
 const stageLabels: Record<TournamentStage, string> = {
   group_stage: "Group Stage",
@@ -16,13 +17,7 @@ export function formatStage(stage: TournamentStage): string {
 }
 
 export function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
+  return formatKyivDateTime(value);
 }
 
 export function formatScore(match: NormalizedMatch): string {

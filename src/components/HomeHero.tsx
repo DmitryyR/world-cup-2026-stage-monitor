@@ -4,7 +4,8 @@ import type {
   NormalizedMatch,
   TournamentState,
 } from "@/domain/types";
-import { formatDateTime, formatStage } from "@/lib/format";
+import { formatKyivDateTime } from "@/lib/date-format";
+import { formatStage } from "@/lib/format";
 import { StageBadge } from "./StageBadge";
 import { TeamDisplay } from "./TeamDisplay";
 
@@ -79,7 +80,8 @@ export function HomeHero({
                 <TeamDisplay align="right" teamName={nextMatch.awayTeam} />
               </div>
               <div className="mt-5 text-center text-sm font-medium text-slate-600">
-                {formatDateTime(nextMatch.kickoffAt)} - {formatStage(nextMatch.stage)}
+                {formatKyivDateTime(nextMatch.kickoffAt)} Kyiv time -{" "}
+                {formatStage(nextMatch.stage)}
               </div>
             </>
           ) : (
@@ -101,7 +103,8 @@ export function HomeHero({
             />
             <HealthRow
               label="Last Check"
-              value={state ? formatDateTime(state.lastCheckedAt) : "Not run"}
+              value={state ? formatKyivDateTime(state.lastCheckedAt) : "Not run"}
+              hint="Kyiv time"
             />
           </dl>
         </div>
@@ -113,10 +116,12 @@ export function HomeHero({
 function HealthRow({
   label,
   value,
+  hint,
   variant = "default",
 }: {
   label: string;
   value: string;
+  hint?: string;
   variant?: "default" | "success" | "muted";
 }) {
   return (
@@ -132,6 +137,9 @@ function HealthRow({
         }
       >
         {value}
+        {hint ? (
+          <span className="ml-1 text-xs font-semibold text-slate-400">{hint}</span>
+        ) : null}
       </dd>
     </div>
   );

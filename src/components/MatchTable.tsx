@@ -1,5 +1,6 @@
 import type { NormalizedMatch } from "@/domain/types";
-import { formatDateTime, formatScore, formatStage } from "@/lib/format";
+import { formatKyivDateTime } from "@/lib/date-format";
+import { formatScore, formatStage } from "@/lib/format";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { TeamDisplay } from "./TeamDisplay";
 
@@ -14,7 +15,7 @@ export function MatchTable({ matches }: MatchTableProps) {
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
             <tr>
-              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Date (Kyiv time)</th>
               <th className="px-4 py-3">Stage</th>
               <th className="px-4 py-3">Teams</th>
               <th className="px-4 py-3">Score</th>
@@ -26,7 +27,7 @@ export function MatchTable({ matches }: MatchTableProps) {
             {matches.map((match) => (
               <tr key={match.externalId} className="hover:bg-emerald-50/40">
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {formatDateTime(match.kickoffAt)}
+                  {formatKyivDateTime(match.kickoffAt)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-800">
                   {formatStage(match.stage)}
