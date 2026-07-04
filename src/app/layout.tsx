@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, ListChecks, Rows3, Trophy } from "lucide-react";
+import { Activity, CalendarDays, LayoutDashboard, ListChecks, Trophy } from "lucide-react";
+import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 const navItems = [
-  { href: "/", label: "Summary", icon: Trophy },
-  { href: "/matches", label: "Matches", icon: Rows3 },
+  { href: "/", label: "Summary", icon: LayoutDashboard },
+  { href: "/matches", label: "Matches", icon: CalendarDays },
   { href: "/bracket", label: "Bracket", icon: Activity },
   { href: "/agent-log", label: "Agent Log", icon: ListChecks },
 ];
@@ -23,14 +24,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <header className="relative border-b border-slate-200 bg-white shadow-sm">
+          <div className="absolute left-0 top-0 hidden h-full w-10 bg-emerald-700 sm:block" />
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-600 text-white">
-                <Trophy aria-hidden="true" size={21} />
+              <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
+                <Trophy aria-hidden="true" size={24} />
               </span>
               <span>
-                <span className="block text-lg font-semibold">
+                <span className="block text-xl font-black text-slate-950">
                   World Cup 2026 Stage Monitor
                 </span>
                 <span className="block text-sm text-slate-500">
@@ -46,7 +48,7 @@ export default function RootLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:border-emerald-500 hover:text-emerald-700"
+                    className="inline-flex h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700"
                   >
                     <Icon aria-hidden="true" size={16} />
                     {item.label}
@@ -56,7 +58,7 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
       </body>
     </html>
   );

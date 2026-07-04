@@ -1,5 +1,7 @@
 import type { NormalizedMatch } from "@/domain/types";
 import { formatDateTime, formatScore, formatStage } from "@/lib/format";
+import { getTeamDisplayName } from "@/lib/team-flags";
+import { TeamDisplay } from "./TeamDisplay";
 
 type MatchTableProps = {
   matches: NormalizedMatch[];
@@ -7,7 +9,7 @@ type MatchTableProps = {
 
 export function MatchTable({ matches }: MatchTableProps) {
   return (
-    <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
@@ -22,7 +24,7 @@ export function MatchTable({ matches }: MatchTableProps) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {matches.map((match) => (
-              <tr key={match.externalId} className="hover:bg-slate-50">
+              <tr key={match.externalId} className="hover:bg-emerald-50/40">
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                   {formatDateTime(match.kickoffAt)}
                 </td>
@@ -30,16 +32,28 @@ export function MatchTable({ matches }: MatchTableProps) {
                   {formatStage(match.stage)}
                 </td>
                 <td className="px-4 py-3 text-slate-950">
-                  {match.homeTeam} vs {match.awayTeam}
+                  <span className="flex min-w-64 items-center gap-3">
+                    <TeamDisplay teamName={match.homeTeam} variant="compact" />
+                    <span className="text-slate-400">vs</span>
+                    <TeamDisplay teamName={match.awayTeam} variant="compact" />
+                  </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 font-semibold">
                   {formatScore(match)}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 capitalize text-slate-600">
-                  {match.status}
+                <td className="whitespace-nowrap px-4 py-3 capitalize">
+                  <span
+                    className={
+                      match.status === "finished"
+                        ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700"
+                        : "rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700"
+                    }
+                  >
+                    {match.status}
+                  </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                  {match.winner ?? "-"}
+                  {match.winner ? getTeamDisplayName(match.winner) : "-"}
                 </td>
               </tr>
             ))}

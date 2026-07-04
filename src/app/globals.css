@@ -6,7 +6,9 @@
 
 body {
   margin: 0;
-  background: #f7f8fa;
+  background:
+    radial-gradient(circle at top left, rgba(16, 185, 129, 0.08), transparent 30rem),
+    #f7f8fa;
   color: #121417;
   font-family:
     Arial,

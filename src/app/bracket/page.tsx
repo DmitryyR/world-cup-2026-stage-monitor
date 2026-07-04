@@ -19,8 +19,11 @@ export default async function BracketPage() {
 
   return (
     <div className="space-y-7">
-      <div>
+      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <h1 className="text-3xl font-semibold text-slate-950">Bracket</h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Knockout rounds grouped from accepted match data.
+        </p>
       </div>
       {knockoutStages.map((stage) => (
         <BracketRound

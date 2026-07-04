@@ -7,7 +7,7 @@ type AgentRunTableProps = {
 
 export function AgentRunTable({ runs }: AgentRunTableProps) {
   return (
-    <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-normal text-slate-500">
@@ -23,15 +23,17 @@ export function AgentRunTable({ runs }: AgentRunTableProps) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {runs.map((run) => (
-              <tr key={run.id} className="hover:bg-slate-50">
+              <tr key={run.id} className="hover:bg-emerald-50/40">
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                   {formatDateTime(run.startedAt)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                   {run.finishedAt ? formatDateTime(run.finishedAt) : "-"}
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-800">
-                  {run.source}
+                <td className="whitespace-nowrap px-4 py-3">
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
+                    {run.source}
+                  </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                   {run.changesDetected}

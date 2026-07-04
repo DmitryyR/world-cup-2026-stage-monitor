@@ -21,7 +21,7 @@ export function MonitorRunButton() {
 
   return (
     <button
-      className="inline-flex h-10 items-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+      className="inline-flex h-12 items-center gap-2 rounded-md bg-emerald-600 px-5 text-sm font-black text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
       disabled={isRunning}
       onClick={runMonitor}
       title="Run monitor"
