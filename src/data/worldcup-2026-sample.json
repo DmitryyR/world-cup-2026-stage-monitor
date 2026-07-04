@@ -1,0 +1,39 @@
+{
+  "source": "mock",
+  "fetchedAt": "2026-07-04T12:00:00.000Z",
+  "matches": [
+    {
+      "id": "group-a-1",
+      "round": "group_stage",
+      "home": "Canada",
+      "away": "Mexico",
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": "finished",
+      "kickoffAt": "2026-06-11T19:00:00.000Z",
+      "winner": "Canada"
+    },
+    {
+      "id": "group-a-2",
+      "round": "group_stage",
+      "home": "United States",
+      "away": "Japan",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled",
+      "kickoffAt": "2026-06-12T22:00:00.000Z",
+      "winner": null
+    },
+    {
+      "id": "r32-1",
+      "round": "round_of_32",
+      "home": "Brazil",
+      "away": "Germany",
+      "homeScore": null,
+      "awayScore": null,
+      "status": "scheduled",
+      "kickoffAt": "2026-06-28T19:00:00.000Z",
+      "winner": null
+    }
+  ]
+}
