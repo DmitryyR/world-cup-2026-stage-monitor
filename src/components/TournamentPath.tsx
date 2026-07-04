@@ -14,28 +14,28 @@ const stageToneClasses: Record<TournamentPathStage["status"], string> = {
 };
 
 const stageWidthClasses: Record<TournamentPathStage["id"], string> = {
-  group_stage: "md:w-72 md:min-w-72",
-  round_of_32: "md:w-64 md:min-w-64",
-  round_of_16: "md:w-36 md:min-w-36",
-  quarter_final: "md:w-32 md:min-w-32",
-  semi_final: "md:w-28 md:min-w-28",
-  final: "md:w-24 md:min-w-24",
-  champion: "md:w-28 md:min-w-28",
+  group_stage: "md:w-[240px] md:min-w-[240px]",
+  round_of_32: "md:w-[260px] md:min-w-[260px]",
+  round_of_16: "md:w-[180px] md:min-w-[180px]",
+  quarter_final: "md:w-[160px] md:min-w-[160px]",
+  semi_final: "md:w-[160px] md:min-w-[160px]",
+  final: "md:w-[140px] md:min-w-[140px]",
+  champion: "md:w-[140px] md:min-w-[140px]",
 };
 
 export function TournamentPath({ stages }: TournamentPathProps) {
   return (
     <section className="space-y-4">
-      <div className="overflow-x-auto pb-2">
-        <div className="flex min-w-0 flex-col gap-3 md:min-w-max md:flex-row md:items-stretch">
+      <div className="overflow-x-auto pb-4">
+        <div className="flex min-w-0 flex-col gap-4 md:min-w-max md:flex-row md:items-stretch md:gap-5">
           {stages.map((stage, index) => (
             <div
               key={stage.id}
-              className="flex flex-col gap-3 md:flex-row md:items-center"
+              className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-4"
             >
               <PathStageCard stage={stage} />
               {index < stages.length - 1 ? (
-                <div className="flex items-center justify-center text-slate-300">
+                <div className="flex shrink-0 items-center justify-center text-slate-300">
                   <ArrowRight
                     aria-hidden="true"
                     className="hidden md:block"
@@ -69,9 +69,9 @@ function PathStageCard({ stage }: { stage: TournamentPathStage }) {
     <article
       className={`flex w-full min-w-0 flex-col rounded-lg border p-4 shadow-sm ${widthClass} ${toneClass}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-xs font-black uppercase tracking-normal opacity-70">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="max-w-full break-words text-xs font-black uppercase leading-snug tracking-normal opacity-70">
             {stage.label}
           </div>
           <div className="mt-1 text-3xl font-black">
@@ -79,7 +79,9 @@ function PathStageCard({ stage }: { stage: TournamentPathStage }) {
             <span className="ml-1 text-sm font-bold uppercase opacity-60">slots</span>
           </div>
         </div>
-        <StageStatusBadge stage={stage} />
+        <div className="shrink-0">
+          <StageStatusBadge stage={stage} />
+        </div>
       </div>
 
       <div className="mt-4 min-h-28">
@@ -100,7 +102,7 @@ function StageStatusBadge({ stage }: { stage: TournamentPathStage }) {
 
   if (stage.status === "current") {
     return (
-      <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold uppercase text-white">
+      <span className="inline-flex whitespace-nowrap rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold uppercase text-white">
         Current
       </span>
     );
@@ -108,14 +110,14 @@ function StageStatusBadge({ stage }: { stage: TournamentPathStage }) {
 
   if (stage.status === "completed") {
     return (
-      <span className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold uppercase text-white">
+      <span className="inline-flex whitespace-nowrap rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold uppercase text-white">
         Complete
       </span>
     );
   }
 
   return (
-    <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold uppercase text-slate-500">
+    <span className="inline-flex whitespace-nowrap rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold uppercase text-slate-500">
       Future
     </span>
   );

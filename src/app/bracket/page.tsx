@@ -27,7 +27,7 @@ export default async function BracketPage() {
             Tournament Path
           </div>
           <h1 className="mt-2 text-6xl font-black tracking-normal text-slate-950 sm:text-7xl">
-            48 → 1
+            48 {"\u2192"} 1
           </h1>
           <p className="mt-3 text-base font-medium text-slate-500">
             World Cup 2026 progression
