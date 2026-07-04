@@ -16,14 +16,14 @@ type BracketBoardProps = {
 
 export function BracketBoard({ matches }: BracketBoardProps) {
   return (
-    <section className="overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/30">
-      <div className="border-b border-white/10 px-5 py-4">
+    <section className="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/30">
+      <div className="border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
         <h1 className="text-lg font-black uppercase text-slate-50">
           Tournament Bracket
         </h1>
       </div>
-      <div className="overflow-x-auto pb-4">
-        <div className="grid min-w-[1280px] grid-cols-6">
+      <div className="overflow-x-auto overscroll-x-contain pb-5">
+        <div className="grid min-w-[1160px] grid-cols-[220px_220px_190px_190px_170px_170px]">
           {knockoutStages.map((stage, index) => (
             <BracketRound
               key={stage}
@@ -50,7 +50,7 @@ function BracketRound({
   const roundMatches = matches.filter((match) => match.stage === stage);
 
   return (
-    <div className="min-w-52 border-r border-white/10 px-3 py-4 last:border-r-0">
+    <div className="min-w-0 border-r border-white/10 px-3 py-4 last:border-r-0">
       <div className="mb-4 text-center">
         <div className="text-xs font-black uppercase text-slate-200">
           {formatStage(stage)}
@@ -59,7 +59,7 @@ function BracketRound({
           {roundMatches.length * 2 || "-"} teams
         </div>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {roundMatches.map((match) => (
           <BracketMatchCard
             key={match.externalId}
@@ -69,7 +69,7 @@ function BracketRound({
           />
         ))}
         {roundMatches.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-4 text-center text-sm text-slate-500">
+          <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
             Pending
           </div>
         ) : null}
@@ -94,19 +94,19 @@ function BracketMatchCard({
 
   return (
     <article
-      className={`relative rounded-lg border border-white/10 bg-slate-900/80 p-3 shadow-lg shadow-black/20 ${
+      className={`relative min-w-0 rounded-lg border border-white/10 bg-slate-900/80 p-2.5 shadow-lg shadow-black/20 ${
         isLast
           ? ""
           : "after:absolute after:left-full after:top-1/2 after:hidden after:h-px after:w-4 after:bg-slate-600 md:after:block"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2">
         <StatusBadge status={status} />
-        <span className="text-xs text-slate-400">
+        <span className="min-w-0 text-right text-[11px] leading-snug text-slate-400">
           {formatKyivDateTime(match.kickoffAt)}
         </span>
       </div>
-      <div className="mt-3 space-y-2">
+      <div className="mt-2.5 space-y-1.5">
         <TeamRow
           score={match.homeScore}
           teamName={homeTeam}
@@ -118,7 +118,7 @@ function BracketMatchCard({
           winner={match.winner === match.awayTeam || match.winner === awayTeam}
         />
       </div>
-      <div className="mt-3 text-xs text-slate-400">
+      <div className="mt-2.5 text-xs leading-snug text-slate-400">
         {status === "needs_review"
           ? "Finished match needs winner review"
           : winMethod ?? (match.status === "live" ? "Live now" : formatScore(match))}
@@ -137,7 +137,7 @@ function TeamRow({
   winner: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex min-w-0 items-center justify-between gap-2">
       <TeamName teamName={teamName} />
       <span
         className={`shrink-0 text-lg font-black ${

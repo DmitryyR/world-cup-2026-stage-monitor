@@ -30,8 +30,8 @@ export default async function BracketPage() {
     runs.find((run) => run.checkerResult === "passed") ?? null;
 
   return (
-    <div className="space-y-5">
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+    <div className="w-full space-y-5">
+      <section className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <TopMetricCard
           detail={
             <div>
@@ -73,7 +73,7 @@ export default async function BracketPage() {
         <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_300px]">
         <BracketBoard matches={matches} />
         <div className="space-y-4">
           <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />

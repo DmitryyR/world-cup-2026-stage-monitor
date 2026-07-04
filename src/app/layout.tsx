@@ -32,8 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
-          <aside className="border-b border-white/10 bg-slate-950/70 p-4 backdrop-blur lg:min-h-screen lg:border-b-0 lg:border-r lg:p-5">
+        <div className="min-h-screen lg:pl-60">
+          <aside className="border-b border-white/10 bg-slate-950/80 p-4 backdrop-blur lg:fixed lg:inset-y-0 lg:left-0 lg:z-20 lg:w-60 lg:border-b-0 lg:border-r lg:p-5">
             <Link href="/" className="flex items-center gap-3">
               <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500/15 text-amber-300 ring-1 ring-amber-300/30">
                 <Trophy aria-hidden="true" size={28} />
@@ -65,14 +65,14 @@ export default function RootLayout({
               })}
             </nav>
 
-            <div className="mt-8 hidden text-xs text-slate-500 lg:block">
+            <div className="mt-8 hidden text-xs text-slate-500 lg:absolute lg:bottom-6 lg:left-5 lg:right-5 lg:block">
               <div>Kyiv time</div>
               <div>Europe/Kyiv</div>
             </div>
           </aside>
 
-          <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-5">
-            <div className="mx-auto max-w-[1600px]">{children}</div>
+          <main className="min-w-0 px-4 py-5 sm:px-5 lg:px-6 xl:px-7">
+            <div className="w-full max-w-none">{children}</div>
           </main>
         </div>
       </body>

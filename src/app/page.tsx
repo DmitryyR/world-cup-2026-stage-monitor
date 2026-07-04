@@ -38,8 +38,8 @@ export default async function HomePage() {
     totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
 
   return (
-    <div className="space-y-5">
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+    <div className="w-full space-y-5">
+      <section className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
         <TopMetricCard
           detail={
             <div>
@@ -91,7 +91,7 @@ export default async function HomePage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_1fr_380px]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_380px]">
         <DashboardSection
           href="/matches"
           icon={<Trophy aria-hidden="true" size={18} />}
@@ -134,7 +134,7 @@ function DashboardSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-white/10 bg-slate-950/40 p-4 shadow-xl shadow-black/20">
+    <section className="min-w-0 rounded-lg border border-white/10 bg-slate-950/40 p-4 shadow-xl shadow-black/20">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 text-sm font-black uppercase text-slate-100">
           {icon}

@@ -22,14 +22,14 @@ export function TopMetricCard({
   accent = "green",
 }: TopMetricCardProps) {
   return (
-    <section className="rounded-lg border border-white/10 bg-slate-900/75 p-5 shadow-xl shadow-black/20 backdrop-blur">
+    <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20 backdrop-blur">
       <div className="text-xs font-black uppercase tracking-normal text-slate-400">
         {label}
       </div>
-      <div className={`mt-4 text-2xl font-black text-slate-50 ${accentClasses[accent]}`}>
+      <div className={`mt-3 text-2xl font-black leading-tight text-slate-50 ${accentClasses[accent]}`}>
         {value}
       </div>
-      {detail ? <div className="mt-3 text-sm text-slate-300">{detail}</div> : null}
+      {detail ? <div className="mt-3 text-sm leading-snug text-slate-300">{detail}</div> : null}
     </section>
   );
 }

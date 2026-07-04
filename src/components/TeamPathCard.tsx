@@ -13,7 +13,7 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
 
   if (!selectedTeam) {
     return (
-      <section className="rounded-lg border border-white/10 bg-slate-900/75 p-5">
+      <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4">
         <h2 className="text-sm font-black uppercase text-slate-100">Team Path</h2>
         <p className="mt-4 text-sm text-slate-400">No accepted team path yet.</p>
       </section>
@@ -27,7 +27,7 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
   const nextMatch = teamMatches.find((match) => match.status !== "finished") ?? null;
 
   return (
-    <section className="rounded-lg border border-white/10 bg-slate-900/75 p-5 shadow-xl shadow-black/20">
+    <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-black uppercase text-slate-100">Team Path</h2>
         <span className="text-xs font-semibold text-blue-300">Auto-selected</span>
@@ -35,7 +35,7 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
       <div className="mt-4">
         <TeamName teamName={selectedTeam} />
       </div>
-      <div className="mt-5 space-y-3 border-l border-slate-700 pl-4">
+      <div className="mt-4 space-y-3 border-l border-slate-700 pl-4">
         {finished.slice(-4).map((match) => (
           <div key={match.externalId} className="relative text-sm">
             <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-emerald-400" />
