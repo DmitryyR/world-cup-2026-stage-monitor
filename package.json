@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "tsx src/scripts/vercel-build.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

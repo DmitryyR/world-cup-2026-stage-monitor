@@ -103,7 +103,7 @@ npm run vercel-build
 ```
 
 4. Add a Postgres database from the Vercel Marketplace or attach an existing Postgres provider.
-5. Ensure the database integration exposes a production `DATABASE_URL`.
+5. Ensure the database integration exposes a production `DATABASE_URL`. The build script also accepts Vercel Postgres defaults: `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`, or `POSTGRES_URL`.
 6. Add the environment variables below.
 7. Deploy.
 
@@ -115,6 +115,8 @@ DATA_PROVIDER="worldcup26"
 WORLDCUP26_BASE_URL="https://worldcup26.ir"
 API_REQUEST_TIMEOUT_MS="10000"
 ```
+
+If Vercel Postgres only provides `POSTGRES_PRISMA_URL` or `POSTGRES_URL`, `npm run vercel-build` will use that value as `DATABASE_URL` for Prisma migrations. Adding an explicit `DATABASE_URL` is still the clearest option.
 
 ### First Production Run
 
