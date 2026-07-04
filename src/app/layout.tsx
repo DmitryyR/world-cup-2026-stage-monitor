@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const navItems = [
   { href: "/", label: "Summary", icon: LayoutDashboard },
   { href: "/matches", label: "Matches", icon: CalendarDays },
-  { href: "/bracket", label: "Bracket", icon: Activity },
+  { href: "/bracket", label: "Tournament Path", icon: Activity },
   { href: "/agent-log", label: "Agent Log", icon: ListChecks },
 ];
 
