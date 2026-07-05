@@ -64,7 +64,7 @@ const columnWidths = [260, 230, 210, 190, 300, 190, 210, 230, 260];
 const columnGap = 24;
 const rowHeight = 36;
 const rows = 34;
-const matchRowSpan = 3;
+const matchRowSpan = 4;
 
 const stageColumns: Record<
   Exclude<BracketLayoutRound, "final" | "third_place">,

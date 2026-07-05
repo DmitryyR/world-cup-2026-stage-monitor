@@ -26,6 +26,7 @@ export function TeamName({
       className={`flex min-w-0 items-center gap-2 ${
         align === "right" ? "justify-end text-right" : ""
       } ${muted ? "text-slate-400" : "text-slate-100"}`}
+      title={displayName}
     >
       <span className="flex h-6 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-slate-800 ring-1 ring-white/10">
         {flagCode ? (

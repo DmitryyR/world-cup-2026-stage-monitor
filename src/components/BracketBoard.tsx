@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trophy } from "lucide-react";
 import {
   buildBracketModel,
@@ -24,6 +24,8 @@ type BracketBoardProps = {
   matches: NormalizedMatch[];
 };
 
+type ScaleMode = "fit" | "100" | "75" | "50";
+
 const boardPadding = 20;
 const headerOffset = 48;
 
@@ -41,14 +43,44 @@ const columnLabels: Array<{ column: number; label: string; align: "left" | "cent
 
 export function BracketBoard({ matches }: BracketBoardProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [scaleMode, setScaleMode] = useState<ScaleMode>("75");
+  const [fitScale, setFitScale] = useState(0.75);
   const bracket = buildBracketModel(matches);
   const layout = buildBracketLayout(bracket);
   const finalSlot = layout.slots.find((slot) => slot.round === "final") ?? null;
   const champion = finalSlot?.match?.winner ?? null;
+  const rawCanvasWidth = layout.width + boardPadding * 2;
+  const rawCanvasHeight = layout.height + headerOffset + boardPadding * 2;
+  const scale = getScaleValue(scaleMode, fitScale);
+  const scaledCanvasWidth = rawCanvasWidth * scale;
+  const scaledCanvasHeight = rawCanvasHeight * scale;
+
+  useEffect(() => {
+    const element = scrollRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const scrollElement = element;
+
+    function updateFitScale() {
+      const availableWidth = scrollElement.clientWidth - 24;
+      const nextScale = Math.min(1, Math.max(0.5, availableWidth / rawCanvasWidth));
+
+      setFitScale(roundScale(nextScale));
+    }
+
+    updateFitScale();
+    const observer = new ResizeObserver(updateFitScale);
+    observer.observe(scrollElement);
+
+    return () => observer.disconnect();
+  }, [rawCanvasWidth]);
 
   function scrollTo(position: number) {
     scrollRef.current?.scrollTo({
-      left: position,
+      left: position * scale,
       behavior: "smooth",
     });
   }
@@ -68,7 +100,17 @@ export function BracketBoard({ matches }: BracketBoardProps) {
               Scroll horizontally to view the full bracket.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2" aria-label="Bracket view controls">
+          <div className="flex flex-wrap gap-2" aria-label="Bracket scale controls">
+            {(["fit", "100", "75", "50"] as const).map((mode) => (
+              <ScaleButton
+                key={mode}
+                active={scaleMode === mode}
+                label={mode === "fit" ? "Fit" : `${mode}%`}
+                onClick={() => setScaleMode(mode)}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2" aria-label="Bracket scroll controls">
             <ScrollButton label="Full bracket" onClick={() => scrollTo(0)} />
             <ScrollButton label="Left half" onClick={() => scrollTo(bracketLayoutControls.left)} />
             <ScrollButton label="Final" onClick={() => scrollTo(bracketLayoutControls.final)} />
@@ -82,31 +124,66 @@ export function BracketBoard({ matches }: BracketBoardProps) {
         ref={scrollRef}
       >
         <div
-          className="relative overflow-visible bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))]"
+          className="relative overflow-visible"
           style={{
-            minWidth: layout.width + boardPadding * 2,
-            width: layout.width + boardPadding * 2,
-            height: layout.height + headerOffset + boardPadding * 2,
-            padding: boardPadding,
+            minWidth: scaledCanvasWidth,
+            width: scaledCanvasWidth,
+            height: scaledCanvasHeight,
           }}
         >
           <div
-            className="relative"
+            className="absolute left-0 top-0 overflow-visible bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))]"
             style={{
-              width: layout.width,
-              height: layout.height + headerOffset,
+              width: rawCanvasWidth,
+              height: rawCanvasHeight,
+              padding: boardPadding,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
             }}
           >
-            <RoundLabels layout={layout} />
-            <ConnectorLayer layout={layout} />
-            <ChampionBlock champion={champion} layout={layout} />
-            {layout.slots.map((slot) => (
-              <BracketSlotCard key={slot.id} slot={slot} />
-            ))}
+            <div
+              className="relative"
+              style={{
+                width: layout.width,
+                height: layout.height + headerOffset,
+              }}
+            >
+              <RoundLabels layout={layout} />
+              <ConnectorLayer layout={layout} />
+              <ChampionBlock champion={champion} layout={layout} />
+              {layout.slots.map((slot) => (
+                <BracketSlotCard key={slot.id} slot={slot} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ScaleButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-pressed={active}
+      className={
+        active
+          ? "rounded-md border border-blue-300/40 bg-blue-500/25 px-3 py-2 text-xs font-black text-blue-50 outline-none ring-2 ring-blue-300/25"
+          : "rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-black text-slate-200 outline-none hover:border-blue-400/40 hover:bg-blue-500/15 focus-visible:ring-2 focus-visible:ring-blue-300/60"
+      }
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
   );
 }
 
@@ -279,7 +356,14 @@ function BracketMatchCard({ match, label }: { match: BracketMatch; label: string
           }
         />
       </div>
-      <div className="mt-1 text-[11px] leading-snug text-slate-400">
+      <div
+        className="mt-1 truncate text-[11px] leading-snug text-slate-400"
+        title={
+          status === "needs_review"
+            ? match.reviewReason ?? "Finished match needs winner review"
+            : winMethod ?? (match.status === "live" ? "Live now" : formatScore(match))
+        }
+      >
         {status === "needs_review"
           ? match.reviewReason ?? "Finished match needs winner review"
           : winMethod ?? (match.status === "live" ? "Live now" : formatScore(match))}
@@ -301,7 +385,7 @@ function TeamRow({
 }) {
   return (
     <div className="flex min-w-0 items-start justify-between gap-2">
-      <TeamName muted={muted} teamName={teamName} truncate={false} />
+      <TeamName muted={muted} teamName={teamName} />
       <span
         className={`shrink-0 text-base font-black leading-tight ${
           winner ? "text-emerald-300" : "text-slate-100"
@@ -344,4 +428,24 @@ function getColumnLefts(layout: BracketLayout): number[] {
   }
 
   return lefts;
+}
+
+function getScaleValue(scaleMode: ScaleMode, fitScale: number): number {
+  if (scaleMode === "fit") {
+    return fitScale;
+  }
+
+  if (scaleMode === "100") {
+    return 1;
+  }
+
+  if (scaleMode === "75") {
+    return 0.75;
+  }
+
+  return 0.5;
+}
+
+function roundScale(value: number): number {
+  return Math.round(value * 100) / 100;
 }
