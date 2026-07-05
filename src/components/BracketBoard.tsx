@@ -40,10 +40,10 @@ export function BracketBoard({ matches }: BracketBoardProps) {
         </h1>
       </div>
 
-      <div className="overflow-x-auto overscroll-x-contain">
-        <div className="relative min-w-[1500px] overflow-hidden bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))] p-5">
+      <div className="w-full overflow-x-auto overflow-y-visible overscroll-x-contain pb-4">
+        <div className="relative min-w-[1800px] overflow-visible bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))] p-5">
           <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-blue-300/25 to-transparent" />
-          <div className="grid grid-cols-[220px_190px_170px_155px_250px_155px_170px_190px_220px] items-start gap-5">
+          <div className="grid grid-cols-[250px_220px_200px_180px_280px_180px_200px_220px_250px] items-start gap-5">
             {bracketStages.map((stage) => (
               <BracketRoundColumn
                 key={`left-${stage}`}

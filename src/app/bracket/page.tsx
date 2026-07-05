@@ -80,10 +80,30 @@ export default async function BracketPage() {
         />
       </section>
 
-      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_300px]">
+      <section className="min-w-0 space-y-3">
+        <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-slate-950/45 p-3 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-semibold">Scroll bracket horizontally to view the full tree.</span>
+          <a
+            className="inline-flex w-fit rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-black text-blue-200 hover:border-blue-400/40 hover:bg-blue-500/15"
+            href="#team-path"
+          >
+            Open Team Path
+          </a>
+        </div>
         <BracketBoard matches={matches} />
-        <TeamPathCard matches={matches} />
-      </div>
+      </section>
+
+      <details
+        className="rounded-lg border border-white/10 bg-slate-950/45 p-4"
+        id="team-path"
+      >
+        <summary className="cursor-pointer text-sm font-black uppercase text-slate-100">
+          Team Path
+        </summary>
+        <div className="mt-4 max-w-xl">
+          <TeamPathCard matches={matches} />
+        </div>
+      </details>
     </div>
   );
 }
