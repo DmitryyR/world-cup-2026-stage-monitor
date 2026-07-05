@@ -1,12 +1,12 @@
-import type { NormalizedMatch, TournamentStage } from "@/domain/types";
+import {
+  buildBracketModel,
+  formatWinMethodLabel,
+  type BracketMatch,
+  type BracketRound as BracketRoundModel,
+} from "@/domain/bracket-builder";
+import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import {
-  getDisplayMatchStatus,
-  getWinMethodLabel,
-  knockoutStages,
-  resolveTeamNameForDisplay,
-} from "@/lib/knockout-display";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
@@ -15,6 +15,8 @@ type BracketBoardProps = {
 };
 
 export function BracketBoard({ matches }: BracketBoardProps) {
+  const bracket = buildBracketModel(matches);
+
   return (
     <section className="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/30">
       <div className="border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
@@ -24,12 +26,11 @@ export function BracketBoard({ matches }: BracketBoardProps) {
       </div>
       <div className="overflow-x-auto overscroll-x-contain pb-5">
         <div className="grid min-w-[1160px] grid-cols-[220px_220px_190px_190px_170px_170px]">
-          {knockoutStages.map((stage, index) => (
+          {bracket.rounds.map((round, index) => (
             <BracketRound
-              key={stage}
-              isLast={index === knockoutStages.length - 1}
-              matches={matches}
-              stage={stage}
+              key={round.stage}
+              isLast={index === bracket.rounds.length - 1}
+              round={round}
             />
           ))}
         </div>
@@ -39,36 +40,31 @@ export function BracketBoard({ matches }: BracketBoardProps) {
 }
 
 function BracketRound({
-  stage,
-  matches,
+  round,
   isLast,
 }: {
-  stage: TournamentStage;
-  matches: NormalizedMatch[];
+  round: BracketRoundModel;
   isLast: boolean;
 }) {
-  const roundMatches = matches.filter((match) => match.stage === stage);
-
   return (
     <div className="min-w-0 border-r border-white/10 px-3 py-4 last:border-r-0">
       <div className="mb-4 text-center">
         <div className="text-xs font-black uppercase text-slate-200">
-          {formatStage(stage)}
+          {formatStage(round.stage)}
         </div>
         <div className="mt-1 text-xs text-slate-500">
-          {roundMatches.length * 2 || "-"} teams
+          {round.matches.length * 2 || "-"} teams
         </div>
       </div>
       <div className="space-y-3">
-        {roundMatches.map((match) => (
+        {round.matches.map((match) => (
           <BracketMatchCard
             key={match.externalId}
             isLast={isLast}
             match={match}
-            matches={matches}
           />
         ))}
-        {roundMatches.length === 0 ? (
+        {round.matches.length === 0 ? (
           <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
             Pending
           </div>
@@ -80,17 +76,13 @@ function BracketRound({
 
 function BracketMatchCard({
   match,
-  matches,
   isLast,
 }: {
-  match: NormalizedMatch;
-  matches: NormalizedMatch[];
+  match: BracketMatch;
   isLast: boolean;
 }) {
-  const status = getDisplayMatchStatus(match);
-  const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
-  const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
-  const winMethod = getWinMethodLabel(match);
+  const status = match.needsReview ? "needs_review" : match.status;
+  const winMethod = formatWinMethodLabel(match);
 
   return (
     <article
@@ -109,13 +101,25 @@ function BracketMatchCard({
       <div className="mt-2.5 space-y-1.5">
         <TeamRow
           score={match.homeScore}
-          teamName={homeTeam}
-          winner={match.winner === match.homeTeam || match.winner === homeTeam}
+          teamName={match.homeParticipant.label}
+          muted={
+            !match.homeParticipant.dependency?.resolvedTeam &&
+            Boolean(match.homeParticipant.dependency)
+          }
+          winner={
+            match.winner === match.homeTeam || match.winner === match.homeParticipant.label
+          }
         />
         <TeamRow
           score={match.awayScore}
-          teamName={awayTeam}
-          winner={match.winner === match.awayTeam || match.winner === awayTeam}
+          teamName={match.awayParticipant.label}
+          muted={
+            !match.awayParticipant.dependency?.resolvedTeam &&
+            Boolean(match.awayParticipant.dependency)
+          }
+          winner={
+            match.winner === match.awayTeam || match.winner === match.awayParticipant.label
+          }
         />
       </div>
       <div className="mt-2.5 text-xs leading-snug text-slate-400">
@@ -130,15 +134,17 @@ function BracketMatchCard({
 function TeamRow({
   teamName,
   score,
+  muted,
   winner,
 }: {
   teamName: string;
   score: number | null;
+  muted: boolean;
   winner: boolean;
 }) {
   return (
     <div className="flex min-w-0 items-center justify-between gap-2">
-      <TeamName teamName={teamName} />
+      <TeamName muted={muted} teamName={teamName} />
       <span
         className={`shrink-0 text-lg font-black ${
           winner ? "text-emerald-300" : "text-slate-100"

@@ -1,21 +1,18 @@
-import type { MatchStatus, NormalizedMatch, TournamentStage } from "@/domain/types";
+import {
+  formatWinMethodLabel,
+  knockoutStages,
+  resolveKnockoutOutcome,
+  type BracketMatch,
+} from "@/domain/bracket-builder";
+import type { MatchStatus, NormalizedMatch } from "@/domain/types";
 import { getTeamDisplayName } from "@/lib/team-flags";
 
 export type DisplayMatchStatus = MatchStatus | "needs_review";
 
-export const knockoutStages: TournamentStage[] = [
-  "round_of_32",
-  "round_of_16",
-  "quarter_final",
-  "semi_final",
-  "third_place",
-  "final",
-];
-
-const knockoutStageSet = new Set<TournamentStage>(knockoutStages);
-
 export function getDisplayMatchStatus(match: NormalizedMatch): DisplayMatchStatus {
-  if (isKnockoutStage(match.stage) && match.status === "finished" && !match.winner) {
+  const outcome = resolveKnockoutOutcome(match);
+
+  if (outcome.needsReview) {
     return "needs_review";
   }
 
@@ -24,17 +21,34 @@ export function getDisplayMatchStatus(match: NormalizedMatch): DisplayMatchStatu
 
 export function getWinMethodLabel(match: NormalizedMatch): string | null {
   if (match.status !== "finished" || !match.winner) {
-    return null;
+    const outcome = resolveKnockoutOutcome(match);
+
+    if (!outcome.winner) {
+      return null;
+    }
+
+    return formatWinMethodLabel({
+      ...match,
+      slotIndex: 1,
+      homeParticipant: { original: match.homeTeam, label: match.homeTeam },
+      awayParticipant: { original: match.awayTeam, label: match.awayTeam },
+      winner: outcome.winner,
+      winMethod: outcome.winMethod,
+      needsReview: outcome.needsReview,
+      reviewReason: outcome.reviewReason,
+      sourceDiagnostics: outcome.sourceDiagnostics,
+    } satisfies BracketMatch);
   }
 
-  const winner = getTeamDisplayName(match.winner);
+  const outcome = resolveKnockoutOutcome(match);
+  const winner = getTeamDisplayName(outcome.winner ?? match.winner);
 
-  if (
-    match.homeScore !== null &&
-    match.awayScore !== null &&
-    match.homeScore === match.awayScore
-  ) {
+  if (outcome.winMethod === "penalties") {
     return `${winner} won on penalties`;
+  }
+
+  if (outcome.winMethod === "extra_time") {
+    return `${winner} won after extra time`;
   }
 
   return `${winner} advanced`;
@@ -56,10 +70,6 @@ export function resolveTeamNameForDisplay(
   }
 
   return getTeamDisplayName(teamName);
-}
-
-export function isKnockoutStage(stage: TournamentStage): boolean {
-  return knockoutStageSet.has(stage);
 }
 
 function resolveDependentTeamLabel(

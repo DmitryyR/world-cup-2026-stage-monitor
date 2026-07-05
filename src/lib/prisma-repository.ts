@@ -47,6 +47,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
       status: match.status as NormalizedMatch["status"],
       kickoffAt: match.kickoffAt.toISOString(),
       winner: match.winner,
+      rawPayload: extractRawProviderMatch(match.rawPayload, match.externalId),
     }));
   }
 
@@ -131,4 +132,45 @@ export class PrismaTournamentRepository implements TournamentRepository {
       errorMessage: run.errorMessage,
     };
   }
+}
+
+function extractRawProviderMatch(rawPayload: string | null, externalId: string): unknown {
+  if (!rawPayload) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(rawPayload) as unknown;
+
+    if (!isRecord(parsed)) {
+      return undefined;
+    }
+
+    const rawProviderPayload = parsed.rawProviderPayload;
+    const response =
+      isRecord(rawProviderPayload) && isRecord(rawProviderPayload.response)
+        ? rawProviderPayload.response
+        : undefined;
+    const rawGames = isRecord(response) && Array.isArray(response.games) ? response.games : [];
+    const rawGame = rawGames.find(
+      (game) =>
+        isRecord(game) &&
+        (String(game.id ?? "") === externalId || String(game._id ?? "") === externalId),
+    );
+
+    if (rawGame) {
+      return rawGame;
+    }
+
+    const normalizedMatches = Array.isArray(parsed.matches) ? parsed.matches : [];
+    return normalizedMatches.find(
+      (rawMatch) => isRecord(rawMatch) && String(rawMatch.id ?? "") === externalId,
+    );
+  } catch {
+    return undefined;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }

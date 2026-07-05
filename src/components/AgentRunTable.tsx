@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { BracketValidation } from "@/domain/bracket-builder";
 import type { AgentRunRecord } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
@@ -8,9 +9,10 @@ import { StatusBadge } from "./StatusBadge";
 
 type AgentRunTableProps = {
   runs: AgentRunRecord[];
+  bracketValidation?: BracketValidation;
 };
 
-export function AgentRunTable({ runs }: AgentRunTableProps) {
+export function AgentRunTable({ runs, bracketValidation }: AgentRunTableProps) {
   const [showPreviousRuns, setShowPreviousRuns] = useState(false);
   const latestRun = runs[0] ?? null;
   const previousRuns = runs.slice(1);
@@ -23,7 +25,7 @@ export function AgentRunTable({ runs }: AgentRunTableProps) {
           {latestRun ? <StatusBadge status={latestRun.checkerResult} /> : null}
         </div>
         {latestRun ? (
-          <RunDetails run={latestRun} />
+          <RunDetails bracketValidation={bracketValidation} run={latestRun} />
         ) : (
           <p className="mt-4 text-sm text-slate-400">No monitor runs yet.</p>
         )}
@@ -79,19 +81,61 @@ export function AgentRunTable({ runs }: AgentRunTableProps) {
   );
 }
 
-function RunDetails({ run }: { run: AgentRunRecord }) {
+function RunDetails({
+  run,
+  bracketValidation,
+}: {
+  run: AgentRunRecord;
+  bracketValidation?: BracketValidation;
+}) {
   return (
-    <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-      <RunRow label="Started" value={`${formatKyivDateTime(run.startedAt)} Kyiv time`} />
-      <RunRow
-        label="Finished"
-        value={run.finishedAt ? `${formatKyivDateTime(run.finishedAt)} Kyiv time` : "-"}
-      />
-      <RunRow label="Source" value={run.source} />
-      <RunRow label="Stage" value={run.detectedStage ? formatStage(run.detectedStage) : "-"} />
-      <RunRow label="Changes" value={String(run.changesDetected)} />
-      <RunRow label="Error" value={run.errorMessage ?? "-"} />
-    </dl>
+    <>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <RunRow label="Started" value={`${formatKyivDateTime(run.startedAt)} Kyiv time`} />
+        <RunRow
+          label="Finished"
+          value={run.finishedAt ? `${formatKyivDateTime(run.finishedAt)} Kyiv time` : "-"}
+        />
+        <RunRow label="Source" value={run.source} />
+        <RunRow label="Stage" value={run.detectedStage ? formatStage(run.detectedStage) : "-"} />
+        <RunRow label="Changes" value={String(run.changesDetected)} />
+        <RunRow label="Error" value={run.errorMessage ?? "-"} />
+      </dl>
+      {bracketValidation ? (
+        <div className="mt-5 rounded-lg border border-white/10 bg-slate-950/45 p-4 text-sm">
+          <div className="text-xs font-black uppercase text-slate-500">
+            Bracket diagnostics
+          </div>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            <RunRow
+              label="Needs review"
+              value={String(bracketValidation.needsReviewMatches)}
+            />
+            <RunRow
+              label="Unresolved winners"
+              value={String(bracketValidation.unresolvedWinners)}
+            />
+            <RunRow
+              label="Placeholder dependencies"
+              value={String(bracketValidation.placeholderDependencies)}
+            />
+            <RunRow
+              label="Stale live matches"
+              value={String(bracketValidation.staleLiveMatches)}
+            />
+          </dl>
+          {bracketValidation.affectedMatches.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-xs text-amber-200">
+              {bracketValidation.affectedMatches.map((match) => (
+                <li key={match.externalId}>
+                  Match {match.externalId}: {match.reason}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+    </>
   );
 }
 

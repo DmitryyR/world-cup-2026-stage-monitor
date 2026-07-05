@@ -20,6 +20,7 @@ export type NormalizedMatch = {
   status: MatchStatus;
   kickoffAt: string;
   winner: string | null;
+  rawPayload?: unknown;
 };
 
 export type CheckerStatus = "passed" | "failed";

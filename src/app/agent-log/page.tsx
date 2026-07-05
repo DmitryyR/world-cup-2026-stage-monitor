@@ -1,12 +1,17 @@
 import { AgentRunTable } from "@/components/AgentRunTable";
 import { MonitorRunButton } from "@/components/MonitorRunButton";
+import { buildBracketModel } from "@/domain/bracket-builder";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
 export const dynamic = "force-dynamic";
 
 export default async function AgentLogPage() {
   const repository = new PrismaTournamentRepository();
-  const runs = await repository.getAgentRuns();
+  const [runs, matches] = await Promise.all([
+    repository.getAgentRuns(),
+    repository.getMatches(),
+  ]);
+  const bracket = buildBracketModel(matches);
 
   return (
     <div className="space-y-5">
@@ -22,7 +27,7 @@ export default async function AgentLogPage() {
         </div>
         <MonitorRunButton />
       </div>
-      <AgentRunTable runs={runs} />
+      <AgentRunTable bracketValidation={bracket.validation} runs={runs} />
     </div>
   );
 }

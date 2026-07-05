@@ -3,6 +3,7 @@ import { DataHealthCard } from "@/components/DataHealthCard";
 import { TeamName } from "@/components/TeamName";
 import { TeamPathCard } from "@/components/TeamPathCard";
 import { TopMetricCard } from "@/components/TopMetricCard";
+import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
@@ -28,6 +29,7 @@ export default async function BracketPage() {
     null;
   const latestAcceptedRun =
     runs.find((run) => run.checkerResult === "passed") ?? null;
+  const bracket = buildBracketModel(matches);
 
   return (
     <div className="w-full space-y-5">
@@ -70,13 +72,21 @@ export default async function BracketPage() {
           label="Next Match"
           value={nextMatch ? formatKyivDateTime(nextMatch.kickoffAt) : "-"}
         />
-        <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
+        <DataHealthCard
+          bracketValidation={bracket.validation}
+          latestAcceptedRun={latestAcceptedRun}
+          state={state}
+        />
       </section>
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_300px]">
         <BracketBoard matches={matches} />
         <div className="space-y-4">
-          <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
+          <DataHealthCard
+            bracketValidation={bracket.validation}
+            latestAcceptedRun={latestAcceptedRun}
+            state={state}
+          />
           <TeamPathCard matches={matches} />
         </div>
       </div>

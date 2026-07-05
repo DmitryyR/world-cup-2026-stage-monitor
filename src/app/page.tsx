@@ -7,6 +7,7 @@ import { MonitorRunButton } from "@/components/MonitorRunButton";
 import { TeamName } from "@/components/TeamName";
 import { TeamPathCard } from "@/components/TeamPathCard";
 import { TopMetricCard } from "@/components/TopMetricCard";
+import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
@@ -32,6 +33,7 @@ export default async function HomePage() {
   const nextMatch = upcomingMatches[0] ?? null;
   const latestAcceptedRun =
     runs.find((run) => run.checkerResult === "passed") ?? null;
+  const bracket = buildBracketModel(matches);
   const totalMatches = matches.length;
   const completedMatches = state?.completedMatches ?? 0;
   const progressPercent =
@@ -77,7 +79,11 @@ export default async function HomePage() {
           label="Next Match"
           value={nextMatch ? formatKyivDateTime(nextMatch.kickoffAt) : "-"}
         />
-        <DataHealthCard latestAcceptedRun={latestAcceptedRun} state={state} />
+        <DataHealthCard
+          bracketValidation={bracket.validation}
+          latestAcceptedRun={latestAcceptedRun}
+          state={state}
+        />
       </section>
 
       <div className="flex flex-wrap items-center gap-3">

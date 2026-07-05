@@ -1,13 +1,19 @@
 import type { AgentRunRecord, TournamentState } from "@/domain/types";
+import type { BracketValidation } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { StatusBadge } from "./StatusBadge";
 
 type DataHealthCardProps = {
   latestAcceptedRun: AgentRunRecord | null;
   state: TournamentState | null;
+  bracketValidation?: BracketValidation;
 };
 
-export function DataHealthCard({ latestAcceptedRun, state }: DataHealthCardProps) {
+export function DataHealthCard({
+  latestAcceptedRun,
+  state,
+  bracketValidation,
+}: DataHealthCardProps) {
   const checkerStatus = state?.checkerStatus ?? "failed";
 
   return (
@@ -30,6 +36,34 @@ export function DataHealthCard({ latestAcceptedRun, state }: DataHealthCardProps
             {state ? `${formatKyivDateTime(state.lastCheckedAt)} Kyiv time` : "Not run"}
           </dd>
         </div>
+        {bracketValidation ? (
+          <>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Unresolved winners</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.unresolvedWinners}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Needs review</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.needsReviewMatches}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Placeholder dependencies</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.placeholderDependencies}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Stale live matches</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.staleLiveMatches}
+              </dd>
+            </div>
+          </>
+        ) : null}
       </dl>
     </section>
   );
