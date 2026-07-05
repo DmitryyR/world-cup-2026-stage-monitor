@@ -35,6 +35,17 @@ describe("team display helpers", () => {
     expect(getTeamFallbackInitials("Winner Match 101")).toBe("WM");
   });
 
+  it("removes leaked provider prefixes from team display names", () => {
+    expect(getTeamDisplayName("CU Curaçao")).toBe("Curaçao");
+    expect(getTeamDisplayName("TU Tunisia")).toBe("Tunisia");
+    expect(getTeamDisplayName("IR Iraq")).toBe("Iraq");
+    expect(getTeamDisplayName("NZ New Zealand")).toBe("New Zealand");
+    expect(getTeamDisplayName("SA Saudi Arabia")).toBe("Saudi Arabia");
+    expect(getTeamDisplayName("DR Democratic Republic of the Congo")).toBe(
+      "Democratic Republic of the Congo",
+    );
+  });
+
   it("does not throw on empty or missing team names", () => {
     expect(getTeamDisplayName("")).toBe("Unknown team");
     expect(getTeamDisplayName(undefined)).toBe("Unknown team");

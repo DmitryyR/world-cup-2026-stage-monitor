@@ -177,7 +177,7 @@ describe("bracket builder", () => {
       .find((round) => round.stage === "quarter_final")
       ?.matches.find((match) => match.externalId === "97");
 
-    expect(qfMatch?.homeParticipant.label).toBe("Winner of Paraguay / France");
+    expect(qfMatch?.homeParticipant.label).toBe("Winner of Paraguay vs France");
     expect(qfMatch?.awayParticipant.label).toBe("Morocco");
     expect(qfMatch?.homeParticipant.label).not.toContain("Match 89");
   });
@@ -236,7 +236,7 @@ describe("bracket builder", () => {
     ]);
 
     expect(formatWinMethodLabel(model.rounds[0].matches[0])).toBe(
-      "Paraguay won on penalties",
+      "Paraguay won 4 - 3 on penalties",
     );
   });
 

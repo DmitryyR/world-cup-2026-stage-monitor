@@ -16,8 +16,14 @@ const teams: TeamInfo[] = [
   { displayName: "Cape Verde", flagCode: "cv", shortCode: "CPV" },
   { displayName: "Colombia", flagCode: "co", shortCode: "COL" },
   { displayName: "Croatia", flagCode: "hr", shortCode: "CRO" },
+  { displayName: "Curaçao", flagCode: "cw", shortCode: "CUR" },
   { displayName: "Czech Republic", flagCode: "cz", shortCode: "CZE" },
   { displayName: "Denmark", flagCode: "dk", shortCode: "DEN" },
+  {
+    displayName: "Democratic Republic of the Congo",
+    flagCode: "cd",
+    shortCode: "COD",
+  },
   { displayName: "Ecuador", flagCode: "ec", shortCode: "ECU" },
   { displayName: "Egypt", flagCode: "eg", shortCode: "EGY" },
   { displayName: "England", flagCode: "gb-eng", shortCode: "ENG" },
@@ -26,12 +32,14 @@ const teams: TeamInfo[] = [
   { displayName: "Ghana", flagCode: "gh", shortCode: "GHA" },
   { displayName: "Haiti", flagCode: "ht", shortCode: "HAI" },
   { displayName: "Iran", flagCode: "ir", shortCode: "IRN" },
+  { displayName: "Iraq", flagCode: "iq", shortCode: "IRQ" },
   { displayName: "Italy", flagCode: "it", shortCode: "ITA" },
   { displayName: "Ivory Coast", flagCode: "ci", shortCode: "CIV" },
   { displayName: "Japan", flagCode: "jp", shortCode: "JPN" },
   { displayName: "Mexico", flagCode: "mx", shortCode: "MEX" },
   { displayName: "Morocco", flagCode: "ma", shortCode: "MAR" },
   { displayName: "Netherlands", flagCode: "nl", shortCode: "NED" },
+  { displayName: "New Zealand", flagCode: "nz", shortCode: "NZL" },
   { displayName: "Nigeria", flagCode: "ng", shortCode: "NGA" },
   { displayName: "Norway", flagCode: "no", shortCode: "NOR" },
   { displayName: "Paraguay", flagCode: "py", shortCode: "PAR" },
@@ -42,9 +50,11 @@ const teams: TeamInfo[] = [
   { displayName: "Serbia", flagCode: "rs", shortCode: "SRB" },
   { displayName: "South Africa", flagCode: "za", shortCode: "RSA" },
   { displayName: "South Korea", flagCode: "kr", shortCode: "KOR" },
+  { displayName: "Saudi Arabia", flagCode: "sa", shortCode: "KSA" },
   { displayName: "Spain", flagCode: "es", shortCode: "ESP" },
   { displayName: "Sweden", flagCode: "se", shortCode: "SWE" },
   { displayName: "Switzerland", flagCode: "ch", shortCode: "SUI" },
+  { displayName: "Tunisia", flagCode: "tn", shortCode: "TUN" },
   { displayName: "Turkey", flagCode: "tr", shortCode: "TUR" },
   { displayName: "Ukraine", flagCode: "ua", shortCode: "UKR" },
   { displayName: "United States", flagCode: "us", shortCode: "USA" },
@@ -72,6 +82,16 @@ aliases.us = aliases["united states"];
 aliases.korea = aliases["south korea"];
 aliases["korea republic"] = aliases["south korea"];
 aliases.eng = aliases.england;
+aliases.curacao = aliases["curaçao"];
+aliases.cu = aliases["curaçao"];
+aliases.tu = aliases.tunisia;
+aliases.nz = aliases["new zealand"];
+aliases.sa = aliases["saudi arabia"];
+aliases.irq = aliases.iraq;
+aliases.ir = aliases.iran;
+aliases.dr = aliases["democratic republic of the congo"];
+aliases.drc = aliases["democratic republic of the congo"];
+aliases["dr congo"] = aliases["democratic republic of the congo"];
 
 export function getTeamFlag(teamName: string | null | undefined): string | null {
   return findTeam(teamName)?.flagCode ?? null;
@@ -134,5 +154,9 @@ function normalizeTeamName(teamName: string | null | undefined): string {
 }
 
 function normalizeDisplayInput(teamName: string | null | undefined): string {
-  return teamName?.trim().replace(/\s+/g, " ") ?? "";
+  const normalized = teamName?.trim().replace(/\s+/g, " ") ?? "";
+  const cleanedPlaceholder = normalized.replace(/^(wo|lo)\s+/i, "");
+  const providerPrefixMatch = cleanedPlaceholder.match(/^[A-Z]{2}\s+(.+)$/);
+
+  return providerPrefixMatch?.[1]?.trim() ?? cleanedPlaceholder;
 }

@@ -50,7 +50,7 @@ export default async function BracketPage() {
           value={`${completedMatches} / ${totalMatches || 0}`}
         />
         <TopMetricCard
-          detail={`${state?.remainingMatches ?? 0} matches remaining`}
+          detail={`Tournament matches remaining: ${state?.remainingMatches ?? 0}`}
           label="Current Stage"
           value={state ? formatStage(state.currentStage) : "Not run"}
         />

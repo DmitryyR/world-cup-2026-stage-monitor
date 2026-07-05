@@ -34,6 +34,8 @@ export function getWinMethodLabel(match: NormalizedMatch): string | null {
       awayParticipant: { original: match.awayTeam, label: match.awayTeam },
       winner: outcome.winner,
       winMethod: outcome.winMethod,
+      homePenaltyScore: outcome.penaltyScore?.home ?? null,
+      awayPenaltyScore: outcome.penaltyScore?.away ?? null,
       needsReview: outcome.needsReview,
       reviewReason: outcome.reviewReason,
       sourceDiagnostics: outcome.sourceDiagnostics,

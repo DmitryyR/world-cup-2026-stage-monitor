@@ -117,7 +117,7 @@ function RunDetails({
               value={String(bracketValidation.unresolvedWinners)}
             />
             <RunRow
-              label="Placeholder dependencies"
+              label="Future match dependencies"
               value={String(bracketValidation.placeholderDependencies)}
             />
             <RunRow

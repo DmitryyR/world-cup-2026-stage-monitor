@@ -63,7 +63,7 @@ export default async function HomePage() {
           }
         />
         <TopMetricCard
-          detail={`${state?.remainingMatches ?? 0} matches remaining`}
+          detail={`Tournament matches remaining: ${state?.remainingMatches ?? 0}`}
           label="Current Stage"
           value={state ? formatStage(state.currentStage) : "Not run"}
         />

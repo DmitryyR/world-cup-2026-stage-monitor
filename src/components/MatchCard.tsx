@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
@@ -43,6 +44,12 @@ export function MatchCard({ match }: MatchCardProps) {
             : outcomeLabel ?? formatStage(match.stage)}
         </span>
       </div>
+      <Link
+        className="mt-3 inline-flex text-xs font-semibold text-blue-300 hover:text-blue-200"
+        href="/bracket"
+      >
+        Open in bracket
+      </Link>
     </article>
   );
 }

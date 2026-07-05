@@ -8,6 +8,7 @@ import {
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
+import { formatPlural } from "@/lib/match-filters";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
@@ -25,7 +26,33 @@ export function BracketBoard({ matches }: BracketBoardProps) {
           Tournament Bracket
         </h1>
       </div>
-      <div className="overflow-x-auto overscroll-x-contain pb-5">
+      <div className="grid gap-3 p-3 md:hidden">
+        {bracket.rounds.map((round, index) => (
+          <details
+            className="rounded-lg border border-white/10 bg-slate-950/60"
+            key={round.stage}
+            open={index < 2}
+          >
+            <summary className="flex cursor-pointer items-center justify-between gap-3 px-3 py-3 text-sm font-black uppercase text-slate-100">
+              <span>{formatStage(round.stage)}</span>
+              <span className="text-xs font-semibold normal-case text-slate-500">
+                {round.matches.length * 2 || "-"} teams
+              </span>
+            </summary>
+            <div className="grid gap-3 border-t border-white/10 p-3">
+              {round.matches.map((match) => (
+                <BracketMatchCard isLast key={match.externalId} match={match} />
+              ))}
+              {round.matches.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
+                  Pending
+                </div>
+              ) : null}
+            </div>
+          </details>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto overscroll-x-contain pb-5 md:block">
         <div className="grid min-w-[1320px] grid-cols-6">
           {bracket.rounds.map((round, index) => (
             <BracketRound
@@ -75,7 +102,9 @@ function BracketRound({
             className="flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-semibold text-slate-300 hover:border-blue-400/40 hover:bg-blue-500/15"
             href="/matches"
           >
-            View all {round.matches.length} matches
+            {round.matches.length === 1
+              ? "View match"
+              : `View all ${formatPlural(round.matches.length, "match")}`}
           </Link>
         ) : null}
       </div>

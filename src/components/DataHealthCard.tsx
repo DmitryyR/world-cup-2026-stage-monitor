@@ -57,7 +57,7 @@ export function DataHealthCard({
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-slate-400">Placeholder dependencies</dt>
+              <dt className="text-slate-400">Future match dependencies</dt>
               <dd className="font-semibold text-slate-100">
                 {bracketValidation.placeholderDependencies}
               </dd>

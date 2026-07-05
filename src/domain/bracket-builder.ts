@@ -35,6 +35,8 @@ export type BracketMatch = {
   awayScore: number | null;
   winner: string | null;
   winMethod: WinMethod;
+  homePenaltyScore: number | null;
+  awayPenaltyScore: number | null;
   needsReview: boolean;
   reviewReason: string | null;
   sourceDiagnostics: string[];
@@ -135,6 +137,10 @@ export function resolveKnockoutOutcome(
   needsReview: boolean;
   reviewReason: string | null;
   sourceDiagnostics: string[];
+  penaltyScore?: {
+    home: number;
+    away: number;
+  } | null;
 } {
   if (!isKnockoutStage(match.stage) || match.status !== "finished") {
     return {
@@ -165,16 +171,20 @@ export function resolveKnockoutOutcome(
     };
   }
 
-  const penaltyWinner = resolvePenaltyWinner(match, rawMatch);
-  if (penaltyWinner) {
+  const penaltyResult = resolvePenaltyWinner(match, rawMatch);
+  if (penaltyResult) {
     sourceDiagnostics.push("winner resolved from penalty shootout fields");
 
     return {
-      winner: penaltyWinner,
+      winner: penaltyResult.winner,
       winMethod: "penalties",
       needsReview: false,
       reviewReason: null,
       sourceDiagnostics,
+      penaltyScore: {
+        home: penaltyResult.homePenaltyScore,
+        away: penaltyResult.awayPenaltyScore,
+      },
     };
   }
 
@@ -188,6 +198,7 @@ export function resolveKnockoutOutcome(
       needsReview: false,
       reviewReason: null,
       sourceDiagnostics,
+      penaltyScore: null,
     };
   }
 
@@ -201,6 +212,7 @@ export function resolveKnockoutOutcome(
       needsReview: false,
       reviewReason: null,
       sourceDiagnostics,
+      penaltyScore: null,
     };
   }
 
@@ -214,6 +226,7 @@ export function resolveKnockoutOutcome(
       needsReview: false,
       reviewReason: null,
       sourceDiagnostics,
+      penaltyScore: null,
     };
   }
 
@@ -223,6 +236,7 @@ export function resolveKnockoutOutcome(
     needsReview: true,
     reviewReason: "Finished tied knockout match has no resolvable winner",
     sourceDiagnostics,
+    penaltyScore: null,
   };
 }
 
@@ -236,6 +250,15 @@ export function formatWinMethodLabel(match: BracketMatch): string | null {
   }
 
   if (match.winMethod === "penalties") {
+    if (match.homePenaltyScore !== null && match.awayPenaltyScore !== null) {
+      const winnerPenaltyScore =
+        match.winner === match.homeTeam ? match.homePenaltyScore : match.awayPenaltyScore;
+      const loserPenaltyScore =
+        match.winner === match.homeTeam ? match.awayPenaltyScore : match.homePenaltyScore;
+
+      return `${match.winner} won ${winnerPenaltyScore} - ${loserPenaltyScore} on penalties`;
+    }
+
     return `${match.winner} won on penalties`;
   }
 
@@ -281,6 +304,8 @@ function createBracketMatch(
     awayScore: match.awayScore,
     winner: outcome.winner,
     winMethod: outcome.winMethod,
+    homePenaltyScore: outcome.penaltyScore?.home ?? null,
+    awayPenaltyScore: outcome.penaltyScore?.away ?? null,
     needsReview: outcome.needsReview,
     reviewReason: outcome.reviewReason,
     sourceDiagnostics: outcome.sourceDiagnostics,
@@ -417,7 +442,7 @@ function describeSourceMatch(
   const awayDependency = parseDependency(sourceMatch.awayTeam);
 
   if (!homeDependency && !awayDependency) {
-    return `${sourceMatch.homeTeam} / ${sourceMatch.awayTeam}`;
+    return formatMatchupLabel(sourceMatch.homeTeam, sourceMatch.awayTeam);
   }
 
   const slotIndex = slotIndexById.get(sourceMatch.externalId) ?? 1;
@@ -447,7 +472,7 @@ function describeSourceMatch(
     : sourceMatch.awayTeam;
 
   if (!isTechnicalParticipant(homeLabel) && !isTechnicalParticipant(awayLabel)) {
-    return `${homeLabel} / ${awayLabel}`;
+    return formatMatchupLabel(homeLabel, awayLabel);
   }
 
   return `${label} ${slotIndex}`;
@@ -456,7 +481,7 @@ function describeSourceMatch(
 function resolvePenaltyWinner(
   match: NormalizedMatch,
   rawMatch: Record<string, unknown> | null,
-): string | null {
+): { winner: string; homePenaltyScore: number; awayPenaltyScore: number } | null {
   const homePenaltyScore = parseOptionalNumber(rawMatch?.home_penalty_score);
   const awayPenaltyScore = parseOptionalNumber(rawMatch?.away_penalty_score);
 
@@ -464,7 +489,11 @@ function resolvePenaltyWinner(
     return null;
   }
 
-  return homePenaltyScore > awayPenaltyScore ? match.homeTeam : match.awayTeam;
+  return {
+    winner: homePenaltyScore > awayPenaltyScore ? match.homeTeam : match.awayTeam,
+    homePenaltyScore,
+    awayPenaltyScore,
+  };
 }
 
 function resolveMethodFromText(
@@ -770,6 +799,10 @@ function isTechnicalParticipant(value: string): boolean {
 
 function capitalize(value: string): string {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
+}
+
+function formatMatchupLabel(homeTeam: string, awayTeam: string): string {
+  return `${homeTeam} vs ${awayTeam}`;
 }
 
 function stringify(value: unknown): string {

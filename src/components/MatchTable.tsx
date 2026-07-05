@@ -2,19 +2,20 @@ import type { NormalizedMatch } from "@/domain/types";
 import { resolveKnockoutOutcome } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import { getDisplayMatchStatus } from "@/lib/knockout-display";
+import { getDisplayMatchStatus, getWinMethodLabel } from "@/lib/knockout-display";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
 type MatchTableProps = {
   matches: NormalizedMatch[];
+  emptyMessage?: string;
 };
 
-export function MatchTable({ matches }: MatchTableProps) {
+export function MatchTable({ matches, emptyMessage = "No accepted matches yet." }: MatchTableProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-xl shadow-black/20">
-      <div className="overflow-x-auto">
+      <div className="hidden overflow-x-auto md:block">
         <table className="min-w-full divide-y divide-white/10 text-sm">
           <thead className="bg-white/[0.03] text-left text-xs font-semibold uppercase tracking-normal text-slate-400">
             <tr>
@@ -30,6 +31,7 @@ export function MatchTable({ matches }: MatchTableProps) {
             {matches.map((match) => {
               const outcome = resolveKnockoutOutcome(match);
               const winner = outcome.winner ?? match.winner;
+              const resultMethod = getWinMethodLabel(match);
 
               return (
                 <tr key={match.externalId} className="hover:bg-white/[0.03]">
@@ -53,7 +55,20 @@ export function MatchTable({ matches }: MatchTableProps) {
                     <StatusBadge status={getDisplayMatchStatus(match)} />
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                    {winner ? getTeamDisplayName(winner) : "-"}
+                    {winner ? (
+                      <div>
+                        <div className="font-semibold text-slate-100">
+                          {getTeamDisplayName(winner)}
+                        </div>
+                        {resultMethod ? (
+                          <div className="mt-1 text-xs text-emerald-300">
+                            {resultMethod}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
                   </td>
                 </tr>
               );
@@ -61,12 +76,72 @@ export function MatchTable({ matches }: MatchTableProps) {
             {matches.length === 0 ? (
               <tr>
                 <td className="px-4 py-8 text-center text-slate-500" colSpan={6}>
-                  No accepted matches yet.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : null}
           </tbody>
         </table>
+      </div>
+      <div className="grid gap-3 p-3 md:hidden">
+        {matches.map((match) => {
+          const outcome = resolveKnockoutOutcome(match);
+          const winner = outcome.winner ?? match.winner;
+          const resultMethod = getWinMethodLabel(match);
+
+          return (
+            <article
+              aria-label={`${getTeamDisplayName(match.homeTeam)} versus ${getTeamDisplayName(
+                match.awayTeam,
+              )}`}
+              className="rounded-lg border border-white/10 bg-slate-900/75 p-3"
+              key={match.externalId}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-slate-500">
+                    {formatKyivDateTime(match.kickoffAt)}
+                  </div>
+                  <div className="mt-1 text-xs font-black uppercase text-slate-400">
+                    {formatStage(match.stage)}
+                  </div>
+                </div>
+                <StatusBadge status={getDisplayMatchStatus(match)} />
+              </div>
+              <div className="mt-3 grid grid-cols-[1fr_auto] gap-3">
+                <div className="space-y-2">
+                  <TeamName teamName={match.homeTeam} />
+                  <TeamName teamName={match.awayTeam} />
+                </div>
+                <div className="self-center rounded-md bg-white/10 px-3 py-1.5 text-center text-lg font-black text-slate-50">
+                  {match.status === "scheduled" ? "-" : formatScore(match)}
+                </div>
+              </div>
+              <div className="mt-3 text-sm text-slate-300">
+                {winner ? (
+                  <>
+                    Winner:{" "}
+                    <span className="font-semibold text-emerald-300">
+                      {getTeamDisplayName(winner)}
+                    </span>
+                  </>
+                ) : (
+                  "Winner pending"
+                )}
+              </div>
+              {resultMethod ? (
+                <div className="mt-1 text-xs font-semibold text-emerald-300">
+                  {resultMethod}
+                </div>
+              ) : null}
+            </article>
+          );
+        })}
+        {matches.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-6 text-center text-sm text-slate-400">
+            {emptyMessage}
+          </div>
+        ) : null}
       </div>
     </div>
   );
