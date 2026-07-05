@@ -1,6 +1,17 @@
 # Evals
 
-These eval scenarios protect the domain contract and reviewer-facing Agentic Engineering requirements.
+These eval scenarios protect the domain contract, provider behavior, UI quality, and reviewer-facing Agentic Engineering requirements.
+
+## Verification Commands
+
+Run before submission and after meaningful changes:
+
+```bash
+npm run test
+npm run typecheck
+npm run lint
+npm run build
+```
 
 ## Required Eval Cases
 
@@ -26,13 +37,53 @@ These eval scenarios protect the domain contract and reviewer-facing Agentic Eng
 | E18 | WorldCup26 empty response | Monitor run fails and existing public matches/state remain unchanged. |
 | E19 | WorldCup26 unknown stage/status | Monitor run fails clearly and public state is unchanged. |
 | E20 | Full future knockout schedule exists | Detector returns the earliest unresolved stage, not the latest future fixture. |
+| E21 | Finished tied knockout with penalties | Bracket/result formatting shows penalty winner and method. |
+| E22 | Future placeholder participants | UI shows `Winner of Team A vs Team B` or `TBD`, never raw provider tokens. |
+| E23 | Bracket coordinate layout | Left/right halves feed into center Final; semifinal losers feed Bronze Final. |
 
-## Manual Review Checklist
+## Business Rules Checked
 
-- Maker modules can generate proposed state without checker approval.
-- Checker module can reject proposed state with clear errors.
-- Monitor loop logs failed runs.
-- Failed runs do not update public tournament state.
-- Tests cover detector and checker before UI code exists.
-- Real-provider tests use fixtures or mocked fetch, not the live API.
-- `worldcup26.ir` is treated as untrusted external data, not official FIFA truth.
+- Scheduled matches cannot have winners.
+- Live matches cannot have final winners.
+- Finished matches require scores.
+- Winner must be one of the match participants.
+- Champion cannot exist before the final is finished.
+- Finished final must produce champion.
+- Tournament cannot exceed 104 matches.
+- Current stage cannot regress from persisted accepted state.
+- Final finished with winner means tournament is completed.
+- Full future schedules must not advance current stage past the earliest unresolved stage.
+
+## Provider / Checker Expectations
+
+- Providers are untrusted inputs.
+- Provider mapping belongs in `src/providers`.
+- Normalized matches must pass schemas before stage detection.
+- Checker rejects unsafe proposed state.
+- Failed runs are logged in Agent Log.
+- Failed runs do not publish matches or tournament state.
+- Real-provider tests should use fixtures or mocked fetch, not live network calls.
+
+## UI / Product Quality Checks
+
+- Summary explains current tournament state quickly.
+- Matches page supports filters, search, and empty states.
+- Bracket uses readable labels, status badges, scores, and win methods.
+- Teams page allows selecting a team path.
+- Agent Log keeps successful and failed monitor runs visible.
+- Data Health is compact in product views and detailed in admin context.
+- User-facing timestamps use Europe/Kyiv formatting.
+- UI does not expose raw backend tokens such as `WO`, `LO`, `WM`, or `LM`.
+
+## Manual Verification Checklist
+
+- Open live demo.
+- Click **Run Monitor**.
+- Confirm run feedback is visible.
+- Confirm Agent Log receives the new run.
+- Confirm Summary reads accepted persisted state.
+- Confirm Matches filters and team search work.
+- Confirm Bracket is horizontally scrollable and readable.
+- Confirm Team Path can select a team.
+- Confirm no secrets appear in docs or UI.
+- Run all verification commands locally before submission.

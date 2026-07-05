@@ -1,8 +1,114 @@
 # World Cup 2026 Stage Monitor
 
-A small Next.js application that monitors FIFA World Cup 2026 tournament progress, detects the current stage, validates proposed state through a checker, and publishes only accepted tournament data.
+World Cup 2026 Stage Monitor is a Next.js application that monitors FIFA World Cup 2026 tournament progress, detects the current stage, validates proposed state through a checker, and publishes only accepted tournament data.
 
-The app is intentionally compact. Its main purpose is to demonstrate Agentic Engineering practices: clear context, maker/checker separation, loop engineering, validation, tests, and evals.
+This repository was prepared as a greenfield homework submission for **fwdays Academy Agentic Engineering**. The project demonstrates context engineering, maker/checker separation, loop engineering, real-data provider abstraction, verification, and deployment readiness.
+
+## Live Demo
+
+- Live demo: https://world-cup-2026-stage-monitor.vercel.app
+- GitHub repo: https://github.com/DmitryyR/world-cup-2026-stage-monitor
+
+## Problem / Goal
+
+Tournament data from external providers can be incomplete, delayed, inconsistent, or represented with provider-specific labels. The goal is to build a small monitoring system that:
+
+- fetches World Cup 2026 match data from a real provider;
+- normalizes it into a stable internal model;
+- detects the current tournament stage;
+- validates proposed state before publication;
+- persists only checker-approved data;
+- exposes a dashboard, match center, bracket, team paths, and agent logs.
+
+## Features
+
+- Summary dashboard with tournament progress, current stage, live match, next match, and compact data health.
+- Match Center with search, filters, status badges, Kyiv time formatting, and accepted persisted matches.
+- Coordinate-based knockout bracket board with internal scale controls and horizontal scrolling.
+- Teams page with team search and selectable Team Path.
+- Agent Log with monitor run history and checker outcomes.
+- Run Monitor action that executes the maker/checker loop and refreshes accepted data.
+- Real-data-first provider strategy using `worldcup26.ir`, plus mock mode for deterministic local demos.
+- PostgreSQL persistence through Prisma, deployed on Vercel with Neon Postgres.
+
+## Architecture
+
+```text
+Fetcher Agent
+-> Normalizer Agent
+-> Stage Detector Agent
+-> Checker Agent
+-> Persistence
+-> AgentRun Log
+-> UI reads accepted database state
+```
+
+The UI does not call external sports APIs directly. It reads accepted state from the database/repository/API routes. Provider-specific parsing stays in `src/providers`; shared validation stays in `src/domain`.
+
+## Agentic Engineering Practices
+
+### Context Engineering
+
+Project context is captured in:
+
+- `docs/PRD.md`
+- `docs/PRD-v2.md`
+- `docs/SDD.md`
+- `docs/AGENTS.md`
+- `docs/EVALS.md`
+- `docs/DESIGN.md`
+- `docs/ADR-001-real-data-provider.md`
+
+These docs guided implementation, review, provider migration, UI iteration, and deployment decisions.
+
+### Maker / Checker Separation
+
+Maker responsibilities:
+
+- fetch provider payloads;
+- normalize data;
+- propose tournament stage.
+
+Checker responsibilities:
+
+- reject inconsistent match data;
+- reject unsafe tournament state;
+- prevent invalid runs from being published.
+
+The monitor loop persists data only after checker approval.
+
+### Loop Engineering
+
+The project was built iteratively:
+
+- domain model and tests first;
+- mock provider MVP;
+- real provider abstraction;
+- checker-protected monitor loop;
+- persisted state and Agent Log;
+- Vercel/Postgres deployment;
+- UI and accessibility refinements;
+- bracket and team path improvements.
+
+### Verification
+
+Core rules are covered by Vitest tests:
+
+- stage detector behavior;
+- checker rejection rules;
+- provider mapping;
+- monitor loop persistence;
+- bracket layout and formatting helpers;
+- date formatting and match filters.
+
+Run the full verification set:
+
+```bash
+npm run test
+npm run typecheck
+npm run lint
+npm run build
+```
 
 ## Stack
 
@@ -13,32 +119,10 @@ The app is intentionally compact. Its main purpose is to demonstrate Agentic Eng
 - PostgreSQL
 - Zod
 - Vitest
+- Vercel
+- Neon Postgres
 
-## Agentic Engineering Shape
-
-Maker agents:
-
-- Fetcher Agent reads provider data.
-- Normalizer Agent converts provider payloads into the internal schema.
-- Stage Detector Agent proposes the current tournament state.
-
-Checker agent:
-
-- Checker Agent validates matches and proposed state.
-- Invalid runs are logged but not published.
-
-Monitor loop:
-
-```text
-Fetcher Agent
--> Normalizer Agent
--> Stage Detector Agent
--> Checker Agent
--> Persistence
--> AgentRun Log
-```
-
-## Setup
+## Local Setup
 
 ```bash
 npm install
@@ -50,25 +134,25 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Set `DATABASE_URL` to a local or hosted Postgres database before running migrations.
-
-The main free provider for current World Cup 2026 data is `worldcup26`, backed by the community/open-source `worldcup26.ir` API. It does not require an API key.
-
-```env
-DATA_PROVIDER=worldcup26
-WORLDCUP26_BASE_URL=https://worldcup26.ir
-API_REQUEST_TIMEOUT_MS=10000
-```
-
-API-Football remains available for historical provider smoke testing, for example `season=2022`, if you have an API key.
-
-For deterministic offline development, use:
-
-```env
-DATA_PROVIDER=mock
-```
-
 The production database is PostgreSQL. Local development should use the same Postgres-backed Prisma schema.
+
+## Environment Variables
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+DATA_PROVIDER="worldcup26"
+WORLDCUP26_BASE_URL="https://worldcup26.ir"
+API_REQUEST_TIMEOUT_MS="10000"
+```
+
+- `DATABASE_URL`: runtime database URL used by the application.
+- `DIRECT_URL`: direct/unpooled database URL used by Prisma migrations.
+- `DATA_PROVIDER`: `worldcup26` for real data, or `mock` for deterministic local demos.
+- `WORLDCUP26_BASE_URL`: community/open-source World Cup 2026 provider base URL.
+- `API_REQUEST_TIMEOUT_MS`: provider request timeout.
+
+No secrets are committed. `.env.local` and database files are ignored.
 
 ## Commands
 
@@ -83,111 +167,50 @@ npm run prisma:studio
 npm run monitor
 ```
 
-## Vercel Deployment
+## Deployment
 
-This project is ready to deploy from GitHub to Vercel with a production PostgreSQL database.
+The app is deployed on Vercel with Neon Postgres.
 
-### GitHub
-
-1. Commit the project, including `prisma/schema.prisma`, `prisma/migrations/**`, `package.json`, `package-lock.json`, and this README.
-2. Push the branch to GitHub.
-
-### Vercel Import
-
-1. In Vercel, create a new project from the GitHub repository.
-2. Keep the framework preset as Next.js.
-3. Set the build command to:
+### Vercel Build Command
 
 ```bash
 npm run vercel-build
 ```
 
-4. Add a Postgres database from the Vercel Marketplace or attach an existing Postgres provider.
-5. Ensure the database integration exposes a production `DATABASE_URL` and a direct/unpooled migration URL as `DIRECT_URL`. With Neon, use the pooled/runtime connection for `DATABASE_URL` and the unpooled/non-pooling connection string for `DIRECT_URL`.
-6. Add the environment variables below.
-7. Deploy.
-
-### Vercel Environment Variables
+### Required Vercel Variables
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
 DATA_PROVIDER="worldcup26"
 WORLDCUP26_BASE_URL="https://worldcup26.ir"
 API_REQUEST_TIMEOUT_MS="10000"
 ```
 
-`DATABASE_URL` is the runtime database URL used by the application. `DIRECT_URL` is the direct/unpooled database URL used by Prisma migrations during `npm run vercel-build`.
+For Neon, `DIRECT_URL` should be the direct/unpooled/non-pooling connection string. This prevents Prisma migration timeout `P1002` during `prisma migrate deploy`.
 
-For Neon/Vercel, set `DIRECT_URL` from the unpooled/non-pooling connection string. The build script checks these variables for migration connectivity in order:
-
-```text
-DIRECT_URL
-DATABASE_URL_UNPOOLED
-DATABASE_POSTGRES_URL_NON_POOLING
-POSTGRES_URL_NON_POOLING
-DATABASE_POSTGRES_URL
-POSTGRES_URL
-```
-
-If `DIRECT_URL` is not explicitly set, the wrapper will use the first available value from that list. Setting `DIRECT_URL` directly is the clearest option and avoids Prisma `P1002` timeouts when `DATABASE_URL` points at a pooled Neon endpoint.
-
-### First Production Run
-
-After the first deploy, open the production site and click **Run Monitor**. That calls the existing monitor route, fetches `worldcup26` data, validates it through the checker, persists accepted `Match`, `TournamentState`, and `AgentRun` rows, and populates the dashboard.
-
-## API Routes
-
-- `GET /api/tournament-state`
-- `GET /api/matches`
-- `GET /api/agent-runs`
-- `POST /api/monitor/run`
+After the first production deploy, open the site and click **Run Monitor** to fetch real provider data, validate it, persist accepted rows, and populate the dashboard.
 
 ## Pages
 
-- `/` tournament summary, latest results, upcoming matches
-- `/matches` accepted match table
-- `/bracket` knockout rounds
+- `/` summary dashboard
+- `/matches` match center
+- `/bracket` knockout bracket
+- `/teams` team paths
 - `/agent-log` monitor runs and checker results
 
-## Project Structure
+## Known Limitations
 
-```text
-docs/
-prisma/
-src/app/
-src/agents/
-src/components/
-src/data/
-src/domain/
-src/lib/
-src/providers/
-src/scripts/
-src/tests/
-```
+- `worldcup26.ir` is a community/open-source provider, not official FIFA data.
+- Live data can be delayed or incomplete before/after matches.
+- The bracket board is coordinate-based and horizontally scrollable; visual QA may still be improved with browser screenshot testing.
+- `rawPayload` remains serialized text for portability and auditability.
+- Runtime monitor execution is manual through **Run Monitor**, not scheduled automatically.
 
-## Verification
+## Demo Video Script
 
-The domain logic is protected before UI work:
+The 1-2 minute demo script is in `docs/DEMO_SCRIPT.md`.
 
-- `src/tests/stage-detector.test.ts`
-- `src/tests/checker.test.ts`
-- `src/tests/monitor-loop.test.ts`
+## Homework Submission Notes
 
-Run:
-
-```bash
-npm run test
-```
-
-## Documentation
-
-- `docs/PRD.md`
-- `docs/PRD-v2.md`
-- `docs/SDD.md`
-- `docs/AGENTS.md`
-- `docs/EVALS.md`
-- `docs/DEMO_SCRIPT.md`
-- `docs/ADR-001-real-data-provider.md`
-
-Note: `rawPayload` remains serialized text for portability and auditability. Runtime tournament data is persisted in Postgres for production deployments.
+See `docs/HOMEWORK_SUBMISSION.md` for the fwdays Academy Agentic Engineering submission summary and final checklist.

@@ -1,17 +1,27 @@
 # Demo Script
 
-## 1-2 Minute Walkthrough
+## 1-2 Minute Video Walkthrough
 
-This is World Cup 2026 Stage Monitor. It shows the current tournament stage, completed and remaining matches, the champion when known, recent results, upcoming matches, knockout progress, and a log of monitoring runs.
+Hi, my name is Dmitry Remar. This is **World Cup 2026 Stage Monitor**, my fwdays Academy Agentic Engineering homework project.
 
-The important engineering idea is the pipeline. The Fetcher Agent reads provider data from `worldcup26.ir`, API-Football historical smoke mode, or the mock provider. The Normalizer Agent converts it into a stable internal schema, and the Stage Detector Agent proposes the current tournament state. Those are maker agents.
+The app monitors World Cup 2026 tournament state from real provider data. It detects the current stage, validates the result through a checker, persists only accepted data, and shows the result in a dashboard.
 
-Before anything is published, the Checker Agent validates the proposal. It rejects impossible states such as a scheduled match with a winner, a finished match without scores, a champion before the final, stage regression, or more than 104 matches.
+First, on the **Summary** page, I can see tournament progress, current stage, live match status, next match, latest results, upcoming matches, and compact data health.
 
-The monitor loop runs these steps in order and records every run. Successful runs update the public tournament state. Failed provider runs appear in the agent log, but they do not overwrite valid public data.
+Next, the **Matches** page shows accepted matches from the database. It includes filters for live, today, finished, scheduled, current stage, and a team search.
 
-The current main provider is `DATA_PROVIDER=worldcup26`, which calls `worldcup26.ir/get/games` with no API key. It is a community/open-source provider, not official FIFA data, so every response still passes through normalization and checker validation before publication.
+The **Bracket** page shows the knockout tree. It uses normalized match data, readable team labels, status badges, scores, and win methods like penalties or regular-time wins.
 
-The tests and evals are part of the product. `src/tests/stage-detector.test.ts` and `src/tests/checker.test.ts` protect the core rules. `docs/EVALS.md` lists the scenarios used to review the system.
+The **Agent Log** shows monitor runs. This is important because failed provider or checker runs are logged, but they do not overwrite the last accepted public state.
 
-The UI is intentionally simple: homepage for the current state, matches page for all known matches, bracket page for knockout progress, and agent log page for validation history.
+If I click **Run Monitor**, the app runs the pipeline: Fetcher Agent, Normalizer Agent, Stage Detector Agent, Checker Agent, and then persistence only if the checker passes.
+
+From an Agentic Engineering perspective, the key idea is maker/checker separation. Maker agents propose data and state. The checker validates business rules such as scheduled matches not having winners, finished matches requiring scores, no champion before the final, and no stage regression.
+
+The project also includes context documents like PRD, SDD, AGENTS, EVALS, and DESIGN. Verification is done with `npm run test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
+
+The app is deployed on Vercel with Neon Postgres and is available at:
+
+https://world-cup-2026-stage-monitor.vercel.app
+
+That is the final demo of World Cup 2026 Stage Monitor.
