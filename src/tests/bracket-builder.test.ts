@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBracketModel,
+  formatParticipantLabel,
   formatWinMethodLabel,
   resolveKnockoutOutcome,
 } from "@/domain/bracket-builder";
@@ -9,6 +10,17 @@ import type { NormalizedMatch, TournamentStage } from "@/domain/types";
 const kickoffAt = "2026-07-01T18:00:00.000Z";
 
 describe("bracket builder", () => {
+  it("formats raw placeholder participant labels", () => {
+    expect(formatParticipantLabel("WO Winner of Portugal vs Spain")).toBe(
+      "Winner of Portugal vs Spain",
+    );
+    expect(formatParticipantLabel("LO Loser of Semi-final 1")).toBe(
+      "Loser of Semi-final 1",
+    );
+    expect(formatParticipantLabel("WM Winner Match 93")).toBe("Winner of Match 93");
+    expect(formatParticipantLabel("LM Loser Match 101")).toBe("Loser of Match 101");
+  });
+
   it("resolves finished knockout match with non-tied score as regular time", () => {
     const match = makeMatch({
       homeTeam: "France",

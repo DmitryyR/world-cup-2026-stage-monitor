@@ -20,44 +20,26 @@ export function getDisplayMatchStatus(match: NormalizedMatch): DisplayMatchStatu
 }
 
 export function getWinMethodLabel(match: NormalizedMatch): string | null {
-  if (match.status !== "finished" || !match.winner) {
-    const outcome = resolveKnockoutOutcome(match);
-
-    if (!outcome.winner) {
-      return null;
-    }
-
-    return formatWinMethodLabel({
-      ...match,
-      slotIndex: 1,
-      homeParticipant: { original: match.homeTeam, label: match.homeTeam },
-      awayParticipant: { original: match.awayTeam, label: match.awayTeam },
-      winner: outcome.winner,
-      winMethod: outcome.winMethod,
-      homePenaltyScore: outcome.penaltyScore?.home ?? null,
-      awayPenaltyScore: outcome.penaltyScore?.away ?? null,
-      needsReview: outcome.needsReview,
-      reviewReason: outcome.reviewReason,
-      sourceDiagnostics: outcome.sourceDiagnostics,
-    } satisfies BracketMatch);
-  }
-
   const outcome = resolveKnockoutOutcome(match);
-  const winner = getTeamDisplayName(outcome.winner ?? match.winner);
+  const winner = outcome.winner ?? match.winner;
 
-  if (outcome.winMethod === "penalties") {
-    return `${winner} won on penalties`;
+  if (match.status !== "finished" || !winner) {
+    return null;
   }
 
-  if (outcome.winMethod === "extra_time") {
-    return `${winner} won after extra time`;
-  }
-
-  if (outcome.winMethod === "regular_time") {
-    return `${winner} won in regular time`;
-  }
-
-  return `${winner} advanced`;
+  return formatWinMethodLabel({
+    ...match,
+    slotIndex: 1,
+    homeParticipant: { original: match.homeTeam, label: getTeamDisplayName(match.homeTeam) },
+    awayParticipant: { original: match.awayTeam, label: getTeamDisplayName(match.awayTeam) },
+    winner,
+    winMethod: outcome.winMethod,
+    homePenaltyScore: outcome.penaltyScore?.home ?? null,
+    awayPenaltyScore: outcome.penaltyScore?.away ?? null,
+    needsReview: outcome.needsReview,
+    reviewReason: outcome.reviewReason,
+    sourceDiagnostics: outcome.sourceDiagnostics,
+  } satisfies BracketMatch);
 }
 
 export function resolveTeamNameForDisplay(

@@ -74,6 +74,7 @@ export default async function BracketPage() {
         />
         <DataHealthCard
           bracketValidation={bracket.validation}
+          compact
           latestAcceptedRun={latestAcceptedRun}
           state={state}
         />

@@ -7,12 +7,14 @@ type DataHealthCardProps = {
   latestAcceptedRun: AgentRunRecord | null;
   state: TournamentState | null;
   bracketValidation?: BracketValidation;
+  compact?: boolean;
 };
 
 export function DataHealthCard({
   latestAcceptedRun,
   state,
   bracketValidation,
+  compact = false,
 }: DataHealthCardProps) {
   const checkerStatus = state?.checkerStatus ?? "failed";
   const displayStatus =
@@ -42,7 +44,7 @@ export function DataHealthCard({
             {state ? `${formatKyivDateTime(state.lastCheckedAt)} Kyiv time` : "Not run"}
           </dd>
         </div>
-        {bracketValidation ? (
+        {bracketValidation && !compact ? (
           <>
             <div className="flex justify-between gap-4">
               <dt className="text-slate-400">Unresolved winners</dt>
@@ -69,6 +71,14 @@ export function DataHealthCard({
               </dd>
             </div>
           </>
+        ) : null}
+        {bracketValidation && compact ? (
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate-400">Needs review</dt>
+            <dd className="font-semibold text-slate-100">
+              {bracketValidation.needsReviewMatches}
+            </dd>
+          </div>
         ) : null}
       </dl>
     </section>

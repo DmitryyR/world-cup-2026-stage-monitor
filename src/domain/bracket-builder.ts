@@ -1,4 +1,5 @@
 import type { MatchStatus, NormalizedMatch, TournamentStage } from "./types";
+import { formatPlaceholderTeam } from "@/lib/team-flags";
 
 export type WinMethod =
   | "regular_time"
@@ -379,7 +380,7 @@ function resolveParticipant(
   if (!dependency) {
     return {
       original: value,
-      label: value,
+      label: formatParticipantLabel(value),
     };
   }
 
@@ -442,7 +443,10 @@ function describeSourceMatch(
   const awayDependency = parseDependency(sourceMatch.awayTeam);
 
   if (!homeDependency && !awayDependency) {
-    return formatMatchupLabel(sourceMatch.homeTeam, sourceMatch.awayTeam);
+    return formatMatchupLabel(
+      formatParticipantLabel(sourceMatch.homeTeam),
+      formatParticipantLabel(sourceMatch.awayTeam),
+    );
   }
 
   const slotIndex = slotIndexById.get(sourceMatch.externalId) ?? 1;
@@ -466,10 +470,10 @@ function describeSourceMatch(
 
   const homeLabel = homeDependency
     ? resolveParticipant(sourceMatch.homeTeam, sourceMatch, allMatches, slotIndexById).label
-    : sourceMatch.homeTeam;
+    : formatParticipantLabel(sourceMatch.homeTeam);
   const awayLabel = awayDependency
     ? resolveParticipant(sourceMatch.awayTeam, sourceMatch, allMatches, slotIndexById).label
-    : sourceMatch.awayTeam;
+    : formatParticipantLabel(sourceMatch.awayTeam);
 
   if (!isTechnicalParticipant(homeLabel) && !isTechnicalParticipant(awayLabel)) {
     return formatMatchupLabel(homeLabel, awayLabel);
@@ -661,7 +665,7 @@ function getNextStage(stage: TournamentStage): TournamentStage | null {
 }
 
 function parseDependency(value: string): { kind: BracketDependencyKind; matchId: string } | null {
-  const match = value.match(/^(winner|loser)\s+(?:of\s+)?match\s+(\d+)$/i);
+  const match = formatParticipantLabel(value).match(/^(winner|loser)\s+(?:of\s+)?match\s+(\d+)$/i);
 
   if (!match) {
     return null;
@@ -671,6 +675,10 @@ function parseDependency(value: string): { kind: BracketDependencyKind; matchId:
     kind: match[1].toLowerCase() as BracketDependencyKind,
     matchId: match[2],
   };
+}
+
+export function formatParticipantLabel(value: string | null | undefined): string {
+  return formatPlaceholderTeam(value);
 }
 
 function getRawProviderMatch(match: NormalizedMatch): Record<string, unknown> | null {

@@ -4,6 +4,7 @@ import {
   getTeamFallbackInitials,
   getTeamFlag,
   getTeamShortCode,
+  formatPlaceholderTeam,
 } from "@/lib/team-flags";
 
 describe("team display helpers", () => {
@@ -29,10 +30,21 @@ describe("team display helpers", () => {
   });
 
   it("keeps unknown team names readable with a safe fallback flag", () => {
-    expect(getTeamDisplayName("Winner Match 101")).toBe("Winner Match 101");
+    expect(getTeamDisplayName("Winner Match 101")).toBe("Winner of Match 101");
     expect(getTeamFlag("Winner Match 101")).toBeNull();
     expect(getTeamShortCode("Winner Match 101")).toBe("WIN");
-    expect(getTeamFallbackInitials("Winner Match 101")).toBe("WM");
+    expect(getTeamFallbackInitials("Winner Match 101")).toBe("WO");
+  });
+
+  it("cleans raw placeholder tokens from user-facing labels", () => {
+    expect(formatPlaceholderTeam("WO Winner of Portugal vs Spain")).toBe(
+      "Winner of Portugal vs Spain",
+    );
+    expect(formatPlaceholderTeam("LO Loser of Semi-final 1")).toBe(
+      "Loser of Semi-final 1",
+    );
+    expect(formatPlaceholderTeam("WM Winner Match 93")).toBe("Winner of Match 93");
+    expect(formatPlaceholderTeam("LM Loser Match 101")).toBe("Loser of Match 101");
   });
 
   it("removes leaked provider prefixes from team display names", () => {

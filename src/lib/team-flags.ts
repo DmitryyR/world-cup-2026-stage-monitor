@@ -98,13 +98,22 @@ export function getTeamFlag(teamName: string | null | undefined): string | null 
 }
 
 export function getTeamDisplayName(teamName: string | null | undefined): string {
-  const normalizedInput = normalizeTeamName(teamName);
+  const displayInput = normalizeDisplayInput(teamName);
+  const normalizedInput = displayInput.toLowerCase();
 
   if (!normalizedInput) {
     return "Unknown team";
   }
 
-  return findTeam(teamName)?.displayName ?? teamName?.trim() ?? "Unknown team";
+  return findTeam(displayInput)?.displayName ?? displayInput;
+}
+
+export function formatTeamName(teamName: string | null | undefined): string {
+  return getTeamDisplayName(teamName);
+}
+
+export function formatPlaceholderTeam(teamName: string | null | undefined): string {
+  return normalizeDisplayInput(teamName) || "TBD";
 }
 
 export function getTeamShortCode(teamName: string | null | undefined): string {
@@ -155,8 +164,22 @@ function normalizeTeamName(teamName: string | null | undefined): string {
 
 function normalizeDisplayInput(teamName: string | null | undefined): string {
   const normalized = teamName?.trim().replace(/\s+/g, " ") ?? "";
-  const cleanedPlaceholder = normalized.replace(/^(wo|lo)\s+/i, "");
+  const dependencyToken = normalized.match(/^(wm|lm)\s+(winner|loser)\s+match\s+(\d+)$/i);
+
+  if (dependencyToken) {
+    return `${capitalize(dependencyToken[2])} of Match ${dependencyToken[3]}`;
+  }
+
+  const cleanedPlaceholder = normalized
+    .replace(/^wo\s+/i, "")
+    .replace(/^lo\s+/i, "")
+    .replace(/^winner\s+match\s+(\d+)$/i, "Winner of Match $1")
+    .replace(/^loser\s+match\s+(\d+)$/i, "Loser of Match $1");
   const providerPrefixMatch = cleanedPlaceholder.match(/^[A-Z]{2}\s+(.+)$/);
 
   return providerPrefixMatch?.[1]?.trim() ?? cleanedPlaceholder;
+}
+
+function capitalize(value: string): string {
+  return `${value.slice(0, 1).toUpperCase()}${value.slice(1).toLowerCase()}`;
 }
