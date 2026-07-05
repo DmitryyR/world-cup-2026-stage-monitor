@@ -8,9 +8,15 @@ type TeamNameProps = {
   teamName: string;
   muted?: boolean;
   align?: "left" | "right";
+  truncate?: boolean;
 };
 
-export function TeamName({ teamName, muted = false, align = "left" }: TeamNameProps) {
+export function TeamName({
+  teamName,
+  muted = false,
+  align = "left",
+  truncate = true,
+}: TeamNameProps) {
   const flagCode = getTeamFlag(teamName);
   const displayName = getTeamDisplayName(teamName);
   const initials = getTeamFallbackInitials(teamName);
@@ -28,7 +34,15 @@ export function TeamName({ teamName, muted = false, align = "left" }: TeamNamePr
           <span className="text-[10px] font-black text-slate-400">{initials}</span>
         )}
       </span>
-      <span className="truncate text-sm font-semibold">{displayName}</span>
+      <span
+        className={
+          truncate
+            ? "truncate text-sm font-semibold"
+            : "min-w-0 break-words text-sm font-semibold leading-tight"
+        }
+      >
+        {displayName}
+      </span>
     </span>
   );
 }
