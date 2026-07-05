@@ -103,7 +103,7 @@ npm run vercel-build
 ```
 
 4. Add a Postgres database from the Vercel Marketplace or attach an existing Postgres provider.
-5. Ensure the database integration exposes a production `DATABASE_URL`. The build script also accepts Vercel Postgres defaults: `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`, or `POSTGRES_URL`.
+5. Ensure the database integration exposes a production `DATABASE_URL` and a direct/unpooled migration URL as `DIRECT_URL`. With Neon, use the pooled/runtime connection for `DATABASE_URL` and the unpooled/non-pooling connection string for `DIRECT_URL`.
 6. Add the environment variables below.
 7. Deploy.
 
@@ -111,12 +111,26 @@ npm run vercel-build
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
 DATA_PROVIDER="worldcup26"
 WORLDCUP26_BASE_URL="https://worldcup26.ir"
 API_REQUEST_TIMEOUT_MS="10000"
 ```
 
-If Vercel Postgres only provides `POSTGRES_PRISMA_URL` or `POSTGRES_URL`, `npm run vercel-build` will use that value as `DATABASE_URL` for Prisma migrations. Adding an explicit `DATABASE_URL` is still the clearest option.
+`DATABASE_URL` is the runtime database URL used by the application. `DIRECT_URL` is the direct/unpooled database URL used by Prisma migrations during `npm run vercel-build`.
+
+For Neon/Vercel, set `DIRECT_URL` from the unpooled/non-pooling connection string. The build script checks these variables for migration connectivity in order:
+
+```text
+DIRECT_URL
+DATABASE_URL_UNPOOLED
+DATABASE_POSTGRES_URL_NON_POOLING
+POSTGRES_URL_NON_POOLING
+DATABASE_POSTGRES_URL
+POSTGRES_URL
+```
+
+If `DIRECT_URL` is not explicitly set, the wrapper will use the first available value from that list. Setting `DIRECT_URL` directly is the clearest option and avoids Prisma `P1002` timeouts when `DATABASE_URL` points at a pooled Neon endpoint.
 
 ### First Production Run
 
