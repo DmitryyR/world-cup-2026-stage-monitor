@@ -1,14 +1,13 @@
-import Link from "next/link";
+import { Trophy } from "lucide-react";
 import {
   buildBracketModel,
   formatWinMethodLabel,
   type BracketMatch,
   type BracketRound as BracketRoundModel,
 } from "@/domain/bracket-builder";
-import type { NormalizedMatch } from "@/domain/types";
+import type { NormalizedMatch, TournamentStage } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import { formatPlural } from "@/lib/match-filters";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
@@ -16,144 +15,187 @@ type BracketBoardProps = {
   matches: NormalizedMatch[];
 };
 
+type BracketSide = "left" | "right";
+
+const bracketStages: TournamentStage[] = [
+  "round_of_32",
+  "round_of_16",
+  "quarter_final",
+  "semi_final",
+];
+
 export function BracketBoard({ matches }: BracketBoardProps) {
   const bracket = buildBracketModel(matches);
+  const finalMatch = getRound(bracket.rounds, "final").matches[0] ?? null;
+  const thirdPlaceMatch = getRound(bracket.rounds, "third_place").matches[0] ?? null;
 
   return (
-    <section className="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 shadow-2xl shadow-black/30">
+    <section className="w-full min-w-0 overflow-hidden rounded-lg border border-white/10 bg-slate-950/70 shadow-2xl shadow-black/30">
       <div className="border-b border-white/10 px-4 py-3 sm:px-5 sm:py-4">
-        <h1 className="text-lg font-black uppercase text-slate-50">
+        <div className="text-xs font-black uppercase tracking-normal text-blue-300">
+          Knockout Tree
+        </div>
+        <h1 className="mt-1 text-lg font-black uppercase text-slate-50">
           Tournament Bracket
         </h1>
       </div>
-      <div className="grid gap-3 p-3 md:hidden">
-        {bracket.rounds.map((round, index) => (
-          <details
-            className="rounded-lg border border-white/10 bg-slate-950/60"
-            key={round.stage}
-            open={index < 2}
-          >
-            <summary className="flex cursor-pointer items-center justify-between gap-3 px-3 py-3 text-sm font-black uppercase text-slate-100">
-              <span>{formatStage(round.stage)}</span>
-              <span className="text-xs font-semibold normal-case text-slate-500">
-                {round.matches.length * 2 || "-"} teams
-              </span>
-            </summary>
-            <div className="grid gap-3 border-t border-white/10 p-3">
-              {round.matches.map((match) => (
-                <BracketMatchCard isLast key={match.externalId} match={match} />
-              ))}
-              {round.matches.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
-                  Pending
-                </div>
-              ) : null}
-            </div>
-          </details>
-        ))}
-      </div>
-      <div className="hidden overflow-x-auto overscroll-x-contain pb-5 md:block">
-        <div className="grid min-w-[1320px] grid-cols-6">
-          {bracket.rounds.map((round, index) => (
-            <BracketRound
-              key={round.stage}
-              isLast={index === bracket.rounds.length - 1}
-              round={round}
-            />
-          ))}
+
+      <div className="overflow-x-auto overscroll-x-contain">
+        <div className="relative min-w-[1500px] overflow-hidden bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.88),rgba(2,6,23,0.96))] p-5">
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-blue-300/25 to-transparent" />
+          <div className="grid grid-cols-[220px_190px_170px_155px_250px_155px_170px_190px_220px] items-start gap-5">
+            {bracketStages.map((stage) => (
+              <BracketRoundColumn
+                key={`left-${stage}`}
+                matches={getSideMatches(getRound(bracket.rounds, stage), "left")}
+                side="left"
+                stage={stage}
+              />
+            ))}
+
+            <CenterFinalColumn finalMatch={finalMatch} thirdPlaceMatch={thirdPlaceMatch} />
+
+            {[...bracketStages].reverse().map((stage) => (
+              <BracketRoundColumn
+                key={`right-${stage}`}
+                matches={getSideMatches(getRound(bracket.rounds, stage), "right")}
+                side="right"
+                stage={stage}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function BracketRound({
-  round,
-  isLast,
+function BracketRoundColumn({
+  stage,
+  matches,
+  side,
 }: {
-  round: BracketRoundModel;
-  isLast: boolean;
+  stage: TournamentStage;
+  matches: BracketMatch[];
+  side: BracketSide;
 }) {
   return (
-    <div className="min-w-0 border-r border-white/10 px-3 py-4 last:border-r-0">
-      <div className="mb-4 text-center">
-        <div className="text-xs font-black uppercase text-slate-200">
-          {formatStage(round.stage)}
-        </div>
-        <div className="mt-1 text-xs text-slate-500">
-          {round.matches.length * 2 || "-"} teams
-        </div>
-      </div>
-      <div className={getRoundStackClass(round.stage)}>
-        {round.matches.map((match) => (
-          <BracketMatchCard
-            key={match.externalId}
-            isLast={isLast}
-            match={match}
-          />
+    <div className={getColumnClass(stage)}>
+      <RoundHeader matches={matches} side={side} stage={stage} />
+      <div className={getRoundStackClass(stage)}>
+        {matches.map((match) => (
+          <BracketMatchCard key={match.externalId} match={match} side={side} />
         ))}
-        {round.matches.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
-            Pending
-          </div>
-        ) : null}
-        {round.matches.length > 0 ? (
-          <Link
-            className="flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-semibold text-slate-300 hover:border-blue-400/40 hover:bg-blue-500/15"
-            href="/matches"
-          >
-            {round.matches.length === 1
-              ? "View match"
-              : `View all ${formatPlural(round.matches.length, "match")}`}
-          </Link>
-        ) : null}
+        {matches.length === 0 ? <PendingSlot /> : null}
       </div>
     </div>
   );
 }
 
-function getRoundStackClass(stage: BracketRoundModel["stage"]): string {
-  if (stage === "round_of_16") {
-    return "space-y-4 md:pt-8";
-  }
+function CenterFinalColumn({
+  finalMatch,
+  thirdPlaceMatch,
+}: {
+  finalMatch: BracketMatch | null;
+  thirdPlaceMatch: BracketMatch | null;
+}) {
+  const champion = finalMatch?.winner ?? null;
 
-  if (stage === "quarter_final") {
-    return "space-y-8 md:pt-14";
-  }
+  return (
+    <div className="relative flex min-h-[780px] flex-col items-center justify-start px-1 pt-16">
+      <div className="relative z-10 w-full rounded-xl border border-amber-300/30 bg-amber-400/10 p-4 text-center shadow-2xl shadow-amber-950/20">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/15 text-amber-200 ring-1 ring-amber-200/35">
+          <Trophy aria-hidden="true" size={30} />
+        </div>
+        <div className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-amber-200">
+          World Champion
+        </div>
+        <div className="mt-3 rounded-lg border border-white/10 bg-slate-950/70 p-3">
+          {champion ? (
+            <TeamName teamName={champion} />
+          ) : (
+            <div className="text-2xl font-black uppercase text-slate-300">TBD</div>
+          )}
+        </div>
+      </div>
 
-  if (stage === "semi_final") {
-    return "space-y-12 md:pt-24";
-  }
+      <div className="my-8 h-12 w-px bg-gradient-to-b from-amber-200/40 to-blue-300/25" />
 
-  if (stage === "third_place" || stage === "final") {
-    return "space-y-12 md:pt-32";
-  }
+      <div className="relative w-full">
+        <div className="absolute -left-5 top-1/2 h-px w-5 bg-blue-300/30" />
+        <div className="absolute -right-5 top-1/2 h-px w-5 bg-blue-300/30" />
+        {finalMatch ? (
+          <BracketMatchCard centerLabel="Final" match={finalMatch} side="center" />
+        ) : (
+          <CenterPendingMatch label="Final" />
+        )}
+      </div>
 
-  return "space-y-3";
+      <div className="mt-10 h-16 w-px bg-gradient-to-b from-blue-300/25 to-slate-600/40" />
+
+      <div className="w-full">
+        <div className="mb-2 text-center text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
+          Bronze Final
+        </div>
+        {thirdPlaceMatch ? (
+          <BracketMatchCard
+            centerLabel="Third Place Match"
+            match={thirdPlaceMatch}
+            side="center"
+          />
+        ) : (
+          <CenterPendingMatch label="Third Place Match" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RoundHeader({
+  stage,
+  matches,
+  side,
+}: {
+  stage: TournamentStage;
+  matches: BracketMatch[];
+  side: BracketSide;
+}) {
+  return (
+    <div
+      className={`mb-4 ${side === "right" ? "text-right" : "text-left"}`}
+    >
+      <div className="text-xs font-black uppercase text-slate-100">
+        {formatStage(stage)}
+      </div>
+      <div className="mt-1 text-xs text-slate-500">
+        {matches.length * 2 || "-"} teams
+      </div>
+    </div>
+  );
 }
 
 function BracketMatchCard({
   match,
-  isLast,
+  side,
+  centerLabel,
 }: {
   match: BracketMatch;
-  isLast: boolean;
+  side: BracketSide | "center";
+  centerLabel?: string;
 }) {
   const status = match.needsReview ? "needs_review" : match.status;
   const winMethod = formatWinMethodLabel(match);
 
   return (
     <article
-      className={`relative min-w-0 rounded-lg border border-white/10 bg-slate-900/80 p-2.5 shadow-lg shadow-black/20 ${
-        isLast
-          ? ""
-          : "after:absolute after:left-full after:top-1/2 after:hidden after:h-px after:w-4 after:bg-slate-600 md:after:block"
-      }`}
+      className={`relative rounded-lg border border-white/10 bg-slate-900/90 p-2.5 shadow-lg shadow-black/25 ${getConnectorClass(
+        side,
+      )}`}
     >
       <div className="flex items-start justify-between gap-2">
         <StatusBadge status={status} />
-        <span className="min-w-0 text-right text-[11px] leading-snug text-slate-400">
-          {formatKyivDateTime(match.kickoffAt)}
+        <span className="min-w-0 text-right text-[10px] leading-snug text-slate-500">
+          {centerLabel ?? formatKyivDateTime(match.kickoffAt)}
         </span>
       </div>
       <div className="mt-2.5 space-y-1.5">
@@ -180,7 +222,7 @@ function BracketMatchCard({
           }
         />
       </div>
-      <div className="mt-2.5 text-xs leading-snug text-slate-400">
+      <div className="mt-2.5 text-[11px] leading-snug text-slate-400">
         {status === "needs_review"
           ? match.reviewReason ?? "Finished match needs winner review"
           : winMethod ?? (match.status === "live" ? "Live now" : formatScore(match))}
@@ -204,7 +246,7 @@ function TeamRow({
     <div className="flex min-w-0 items-center justify-between gap-2">
       <TeamName muted={muted} teamName={teamName} />
       <span
-        className={`shrink-0 text-lg font-black ${
+        className={`shrink-0 text-base font-black ${
           winner ? "text-emerald-300" : "text-slate-100"
         }`}
       >
@@ -212,4 +254,77 @@ function TeamRow({
       </span>
     </div>
   );
+}
+
+function CenterPendingMatch({ label }: { label: string }) {
+  return (
+    <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center">
+      <div className="text-[11px] font-black uppercase text-slate-500">{label}</div>
+      <div className="mt-2 text-sm font-black text-slate-300">TBD vs TBD</div>
+    </div>
+  );
+}
+
+function PendingSlot() {
+  return (
+    <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
+      Pending
+    </div>
+  );
+}
+
+function getRound(rounds: BracketRoundModel[], stage: TournamentStage): BracketRoundModel {
+  return rounds.find((round) => round.stage === stage) ?? { stage, matches: [] };
+}
+
+function getSideMatches(round: BracketRoundModel, side: BracketSide): BracketMatch[] {
+  const midpoint = Math.ceil(round.matches.length / 2);
+
+  return side === "left"
+    ? round.matches.slice(0, midpoint)
+    : round.matches.slice(midpoint).reverse();
+}
+
+function getColumnClass(stage: TournamentStage): string {
+  if (stage === "round_of_32") {
+    return "pt-0";
+  }
+
+  if (stage === "round_of_16") {
+    return "pt-16";
+  }
+
+  if (stage === "quarter_final") {
+    return "pt-32";
+  }
+
+  return "pt-52";
+}
+
+function getRoundStackClass(stage: TournamentStage): string {
+  if (stage === "round_of_32") {
+    return "space-y-3";
+  }
+
+  if (stage === "round_of_16") {
+    return "space-y-8";
+  }
+
+  if (stage === "quarter_final") {
+    return "space-y-20";
+  }
+
+  return "space-y-44";
+}
+
+function getConnectorClass(side: BracketSide | "center"): string {
+  if (side === "left") {
+    return "after:absolute after:left-full after:top-1/2 after:h-px after:w-5 after:bg-blue-300/30";
+  }
+
+  if (side === "right") {
+    return "before:absolute before:right-full before:top-1/2 before:h-px before:w-5 before:bg-blue-300/30";
+  }
+
+  return "";
 }
