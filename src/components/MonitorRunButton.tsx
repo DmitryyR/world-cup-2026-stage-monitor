@@ -42,7 +42,7 @@ export function MonitorRunButton() {
 
       setFeedback({
         status: "success",
-        message: `Monitor completed · ${payload.data?.changesDetected ?? 0} changes · ${durationSeconds}s`,
+        message: `Monitor completed - ${payload.data?.changesDetected ?? 0} changes - ${durationSeconds}s`,
       });
       router.refresh();
     } catch (error) {

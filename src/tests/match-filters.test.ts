@@ -48,12 +48,45 @@ describe("match filter helpers", () => {
     ).toEqual(["2"]);
   });
 
+  it("searches by normalized display team names", () => {
+    const matches = [
+      makeMatch({
+        homeTeam: "JO Jordan",
+        awayTeam: "PA Panama",
+        status: "scheduled",
+      }),
+    ];
+
+    expect(
+      filterMatches({
+        activeFilter: "all",
+        currentStage: "round_of_16",
+        matches,
+        searchQuery: "uzbekistan",
+        today,
+      }),
+    ).toEqual([]);
+
+    expect(
+      filterMatches({
+        activeFilter: "all",
+        currentStage: "round_of_16",
+        matches,
+        searchQuery: "jordan",
+        today,
+      }).map((match) => match.externalId),
+    ).toEqual(["1"]);
+  });
+
   it("formats empty states and plurals", () => {
     expect(getEmptyMatchMessage("live", "")).toBe(
       "No live matches are accepted right now.",
     );
     expect(getEmptyMatchMessage("all", "France")).toBe(
       "No matches found for that team search.",
+    );
+    expect(getEmptyMatchMessage("scheduled", "")).toBe(
+      "No scheduled matches are accepted right now.",
     );
     expect(formatPlural(1, "match")).toBe("1 match");
     expect(formatPlural(2, "match")).toBe("2 matches");

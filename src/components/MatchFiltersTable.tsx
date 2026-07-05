@@ -6,6 +6,7 @@ import type { NormalizedMatch, TournamentStage } from "@/domain/types";
 import { formatKyivDate } from "@/lib/date-format";
 import {
   filterMatches,
+  formatPlural,
   getEmptyMatchMessage,
   getMatchFilterCounts,
   type MatchFilter,
@@ -53,6 +54,7 @@ export function MatchFiltersTable({ currentStage, matches }: MatchFiltersTablePr
             {filters.map((filter) => (
               <button
                 key={filter.id}
+                aria-label={`${filter.label}, ${formatPlural(counts[filter.id], "match")}`}
                 aria-pressed={activeFilter === filter.id}
                 className={
                   activeFilter === filter.id

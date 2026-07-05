@@ -1,5 +1,6 @@
 import type { NormalizedMatch, TournamentStage } from "@/domain/types";
 import { formatKyivDate } from "./date-format";
+import { getTeamDisplayName } from "./team-flags";
 
 export type MatchFilter = "all" | "live" | "today" | "finished" | "scheduled" | "current";
 
@@ -54,7 +55,9 @@ export function filterMatches({
 
     return (
       match.homeTeam.toLowerCase().includes(normalizedSearch) ||
-      match.awayTeam.toLowerCase().includes(normalizedSearch)
+      match.awayTeam.toLowerCase().includes(normalizedSearch) ||
+      getTeamDisplayName(match.homeTeam).toLowerCase().includes(normalizedSearch) ||
+      getTeamDisplayName(match.awayTeam).toLowerCase().includes(normalizedSearch)
     );
   });
 }
@@ -70,6 +73,10 @@ export function getEmptyMatchMessage(activeFilter: MatchFilter, searchQuery: str
 
   if (activeFilter === "today") {
     return "No matches are scheduled for today.";
+  }
+
+  if (activeFilter === "scheduled") {
+    return "No scheduled matches are accepted right now.";
   }
 
   if (activeFilter === "current") {

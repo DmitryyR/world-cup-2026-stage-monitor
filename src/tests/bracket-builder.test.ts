@@ -267,6 +267,22 @@ describe("bracket builder", () => {
       "Morocco won in regular time",
     );
   });
+
+  it("formats winner labels with normalized team names", () => {
+    const model = buildBracketModel([
+      makeMatch({
+        homeTeam: "JO Jordan",
+        awayTeam: "PA Panama",
+        homeScore: 2,
+        awayScore: 1,
+        winner: "JO Jordan",
+      }),
+    ]);
+
+    expect(formatWinMethodLabel(model.rounds[0].matches[0])).toBe(
+      "Jordan won in regular time",
+    );
+  });
 });
 
 function makeMatch(overrides: Partial<NormalizedMatch> = {}): NormalizedMatch {

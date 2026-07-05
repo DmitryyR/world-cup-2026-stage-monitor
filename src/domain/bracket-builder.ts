@@ -1,5 +1,5 @@
 import type { MatchStatus, NormalizedMatch, TournamentStage } from "./types";
-import { formatPlaceholderTeam } from "@/lib/team-flags";
+import { formatPlaceholderTeam, formatTeamName } from "@/lib/team-flags";
 
 export type WinMethod =
   | "regular_time"
@@ -250,36 +250,41 @@ export function formatWinMethodLabel(match: BracketMatch): string | null {
     return null;
   }
 
+  const winnerDisplay = formatTeamName(match.winner);
+
   if (match.winMethod === "penalties") {
     if (match.homePenaltyScore !== null && match.awayPenaltyScore !== null) {
+      const winnerIsHome =
+        sameTeam(match.winner, match.homeTeam) ||
+        sameTeam(match.winner, match.homeParticipant.label);
       const winnerPenaltyScore =
-        match.winner === match.homeTeam ? match.homePenaltyScore : match.awayPenaltyScore;
+        winnerIsHome ? match.homePenaltyScore : match.awayPenaltyScore;
       const loserPenaltyScore =
-        match.winner === match.homeTeam ? match.awayPenaltyScore : match.homePenaltyScore;
+        winnerIsHome ? match.awayPenaltyScore : match.homePenaltyScore;
 
-      return `${match.winner} won ${winnerPenaltyScore} - ${loserPenaltyScore} on penalties`;
+      return `${winnerDisplay} won ${winnerPenaltyScore} - ${loserPenaltyScore} on penalties`;
     }
 
-    return `${match.winner} won on penalties`;
+    return `${winnerDisplay} won on penalties`;
   }
 
   if (match.winMethod === "extra_time") {
-    return `${match.winner} won after extra time`;
+    return `${winnerDisplay} won after extra time`;
   }
 
   if (match.winMethod === "inferred_from_next_round") {
-    return `${match.winner} advanced`;
+    return `${winnerDisplay} advanced`;
   }
 
   if (match.winMethod === "walkover") {
-    return `${match.winner} advanced by walkover`;
+    return `${winnerDisplay} advanced by walkover`;
   }
 
   if (match.winMethod === "unknown") {
-    return `${match.winner} advanced`;
+    return `${winnerDisplay} advanced`;
   }
 
-  return `${match.winner} won in regular time`;
+  return `${winnerDisplay} won in regular time`;
 }
 
 function createBracketMatch(
@@ -758,11 +763,19 @@ function collectText(value: unknown): string[] {
 }
 
 function resolveWinnerFromText(match: NormalizedMatch, text: string): string | null {
-  if (text.includes(match.homeTeam.toLowerCase())) {
+  const normalizedText = text.toLowerCase();
+
+  if (
+    normalizedText.includes(match.homeTeam.toLowerCase()) ||
+    normalizedText.includes(formatTeamName(match.homeTeam).toLowerCase())
+  ) {
     return match.homeTeam;
   }
 
-  if (text.includes(match.awayTeam.toLowerCase())) {
+  if (
+    normalizedText.includes(match.awayTeam.toLowerCase()) ||
+    normalizedText.includes(formatTeamName(match.awayTeam).toLowerCase())
+  ) {
     return match.awayTeam;
   }
 
@@ -798,7 +811,7 @@ function getLoser(match: NormalizedMatch, winner: string): string | null {
 }
 
 function sameTeam(left: string, right: string): boolean {
-  return left.trim().toLowerCase() === right.trim().toLowerCase();
+  return formatTeamName(left).trim().toLowerCase() === formatTeamName(right).trim().toLowerCase();
 }
 
 function isTechnicalParticipant(value: string): boolean {

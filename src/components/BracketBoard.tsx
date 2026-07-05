@@ -84,7 +84,7 @@ function BracketRound({
           {round.matches.length * 2 || "-"} teams
         </div>
       </div>
-      <div className="space-y-3">
+      <div className={getRoundStackClass(round.stage)}>
         {round.matches.map((match) => (
           <BracketMatchCard
             key={match.externalId}
@@ -110,6 +110,26 @@ function BracketRound({
       </div>
     </div>
   );
+}
+
+function getRoundStackClass(stage: BracketRoundModel["stage"]): string {
+  if (stage === "round_of_16") {
+    return "space-y-4 md:pt-8";
+  }
+
+  if (stage === "quarter_final") {
+    return "space-y-8 md:pt-14";
+  }
+
+  if (stage === "semi_final") {
+    return "space-y-12 md:pt-24";
+  }
+
+  if (stage === "third_place" || stage === "final") {
+    return "space-y-12 md:pt-32";
+  }
+
+  return "space-y-3";
 }
 
 function BracketMatchCard({

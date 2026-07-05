@@ -33,7 +33,7 @@ describe("team display helpers", () => {
     expect(getTeamDisplayName("Winner Match 101")).toBe("Winner of Match 101");
     expect(getTeamFlag("Winner Match 101")).toBeNull();
     expect(getTeamShortCode("Winner Match 101")).toBe("WIN");
-    expect(getTeamFallbackInitials("Winner Match 101")).toBe("WO");
+    expect(getTeamFallbackInitials("Winner Match 101")).toBe("TBD");
   });
 
   it("cleans raw placeholder tokens from user-facing labels", () => {
@@ -51,8 +51,11 @@ describe("team display helpers", () => {
     expect(getTeamDisplayName("CU Curaçao")).toBe("Curaçao");
     expect(getTeamDisplayName("TU Tunisia")).toBe("Tunisia");
     expect(getTeamDisplayName("IR Iraq")).toBe("Iraq");
+    expect(getTeamDisplayName("JO Jordan")).toBe("Jordan");
     expect(getTeamDisplayName("NZ New Zealand")).toBe("New Zealand");
+    expect(getTeamDisplayName("PA Panama")).toBe("Panama");
     expect(getTeamDisplayName("SA Saudi Arabia")).toBe("Saudi Arabia");
+    expect(getTeamDisplayName("UZ Uzbekistan")).toBe("Uzbekistan");
     expect(getTeamDisplayName("DR Democratic Republic of the Congo")).toBe(
       "Democratic Republic of the Congo",
     );

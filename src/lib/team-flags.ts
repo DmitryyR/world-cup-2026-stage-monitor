@@ -36,12 +36,14 @@ const teams: TeamInfo[] = [
   { displayName: "Italy", flagCode: "it", shortCode: "ITA" },
   { displayName: "Ivory Coast", flagCode: "ci", shortCode: "CIV" },
   { displayName: "Japan", flagCode: "jp", shortCode: "JPN" },
+  { displayName: "Jordan", flagCode: "jo", shortCode: "JOR" },
   { displayName: "Mexico", flagCode: "mx", shortCode: "MEX" },
   { displayName: "Morocco", flagCode: "ma", shortCode: "MAR" },
   { displayName: "Netherlands", flagCode: "nl", shortCode: "NED" },
   { displayName: "New Zealand", flagCode: "nz", shortCode: "NZL" },
   { displayName: "Nigeria", flagCode: "ng", shortCode: "NGA" },
   { displayName: "Norway", flagCode: "no", shortCode: "NOR" },
+  { displayName: "Panama", flagCode: "pa", shortCode: "PAN" },
   { displayName: "Paraguay", flagCode: "py", shortCode: "PAR" },
   { displayName: "Portugal", flagCode: "pt", shortCode: "POR" },
   { displayName: "Qatar", flagCode: "qa", shortCode: "QAT" },
@@ -59,6 +61,7 @@ const teams: TeamInfo[] = [
   { displayName: "Ukraine", flagCode: "ua", shortCode: "UKR" },
   { displayName: "United States", flagCode: "us", shortCode: "USA" },
   { displayName: "Uruguay", flagCode: "uy", shortCode: "URU" },
+  { displayName: "Uzbekistan", flagCode: "uz", shortCode: "UZB" },
 ];
 
 const aliases: Record<string, TeamInfo> = {};
@@ -85,6 +88,12 @@ aliases.eng = aliases.england;
 aliases.curacao = aliases["curaçao"];
 aliases.cu = aliases["curaçao"];
 aliases.tu = aliases.tunisia;
+if (aliases.cw) {
+  aliases.cw.displayName = "Curaçao";
+  aliases.curacao = aliases.cw;
+  aliases.cu = aliases.cw;
+  aliases["curaçao"] = aliases.cw;
+}
 aliases.nz = aliases["new zealand"];
 aliases.sa = aliases["saudi arabia"];
 aliases.irq = aliases.iraq;
@@ -135,6 +144,10 @@ export function getTeamShortCode(teamName: string | null | undefined): string {
 export function getTeamFallbackInitials(teamName: string | null | undefined): string {
   const displayName = getTeamDisplayName(teamName);
 
+  if (isFutureParticipantLabel(displayName) || displayName === "TBD") {
+    return "TBD";
+  }
+
   if (displayName === "Unknown team") {
     return "FC";
   }
@@ -159,7 +172,10 @@ function findTeam(teamName: string | null | undefined): TeamInfo | undefined {
 }
 
 function normalizeTeamName(teamName: string | null | undefined): string {
-  return normalizeDisplayInput(teamName).toLowerCase();
+  return normalizeDisplayInput(teamName)
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 }
 
 function normalizeDisplayInput(teamName: string | null | undefined): string {
@@ -182,4 +198,8 @@ function normalizeDisplayInput(teamName: string | null | undefined): string {
 
 function capitalize(value: string): string {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1).toLowerCase()}`;
+}
+
+function isFutureParticipantLabel(value: string): boolean {
+  return /^(winner|loser) of /i.test(value);
 }
