@@ -239,6 +239,22 @@ describe("bracket builder", () => {
       "Paraguay won on penalties",
     );
   });
+
+  it("formats regular-time winner labels explicitly", () => {
+    const model = buildBracketModel([
+      makeMatch({
+        homeTeam: "Morocco",
+        awayTeam: "Canada",
+        homeScore: 3,
+        awayScore: 0,
+        winner: "Morocco",
+      }),
+    ]);
+
+    expect(formatWinMethodLabel(model.rounds[0].matches[0])).toBe(
+      "Morocco won in regular time",
+    );
+  });
 });
 
 function makeMatch(overrides: Partial<NormalizedMatch> = {}): NormalizedMatch {

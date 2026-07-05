@@ -69,15 +69,15 @@ export default async function HomePage() {
         />
         <TopMetricCard
           accent={liveMatch ? "red" : "blue"}
-          detail={liveMatch ? <TeamLine match={liveMatch} /> : "No live match accepted"}
+          detail={liveMatch ? <LiveMatchDetail match={liveMatch} /> : "No live match accepted"}
           label="Live Now"
-          value={liveMatch ? "Live" : "Idle"}
+          value={liveMatch ? <TeamLine match={liveMatch} /> : "Idle"}
         />
         <TopMetricCard
           accent="blue"
-          detail={nextMatch ? <TeamLine match={nextMatch} /> : "No scheduled match"}
+          detail={nextMatch ? `${formatKyivDateTime(nextMatch.kickoffAt)} Kyiv time` : "No scheduled match"}
           label="Next Match"
-          value={nextMatch ? formatKyivDateTime(nextMatch.kickoffAt) : "-"}
+          value={nextMatch ? <TeamLine match={nextMatch} /> : "-"}
         />
         <DataHealthCard
           bracketValidation={bracket.validation}
@@ -167,4 +167,35 @@ function TeamLine({
       <TeamName teamName={match.awayTeam} />
     </div>
   );
+}
+
+function LiveMatchDetail({
+  match,
+}: {
+  match: {
+    homeTeam: string;
+    awayTeam: string;
+    homeScore: number | null;
+    awayScore: number | null;
+    kickoffAt: string;
+  };
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="text-xl font-black text-red-300">
+        {formatInlineScore(match.homeScore, match.awayScore)}
+      </div>
+      <div className="text-xs text-slate-400">
+        Started {formatKyivDateTime(match.kickoffAt)} Kyiv time
+      </div>
+    </div>
+  );
+}
+
+function formatInlineScore(homeScore: number | null, awayScore: number | null): string {
+  if (homeScore === null || awayScore === null) {
+    return "-";
+  }
+
+  return `${homeScore} - ${awayScore}`;
 }

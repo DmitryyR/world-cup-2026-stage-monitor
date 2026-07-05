@@ -4,6 +4,7 @@ export type WinMethod =
   | "regular_time"
   | "extra_time"
   | "penalties"
+  | "walkover"
   | "inferred_from_next_round"
   | "unknown";
 
@@ -246,11 +247,15 @@ export function formatWinMethodLabel(match: BracketMatch): string | null {
     return `${match.winner} advanced`;
   }
 
+  if (match.winMethod === "walkover") {
+    return `${match.winner} advanced by walkover`;
+  }
+
   if (match.winMethod === "unknown") {
     return `${match.winner} advanced`;
   }
 
-  return `${match.winner} advanced`;
+  return `${match.winner} won in regular time`;
 }
 
 function createBracketMatch(

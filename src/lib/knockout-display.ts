@@ -51,6 +51,10 @@ export function getWinMethodLabel(match: NormalizedMatch): string | null {
     return `${winner} won after extra time`;
   }
 
+  if (outcome.winMethod === "regular_time") {
+    return `${winner} won in regular time`;
+  }
+
   return `${winner} advanced`;
 }
 

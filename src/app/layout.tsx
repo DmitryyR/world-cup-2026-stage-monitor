@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  Activity,
-  CalendarDays,
-  LayoutDashboard,
-  ListChecks,
-  Trophy,
-  Users,
-} from "lucide-react";
+import { Trophy } from "lucide-react";
+import { SidebarNav } from "@/components/SidebarNav";
 import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 
@@ -15,14 +9,6 @@ export const metadata: Metadata = {
   title: "World Cup 2026 Stage Monitor",
   description: "Monitor World Cup 2026 stage progress with maker/checker validation.",
 };
-
-const navItems = [
-  { href: "/", label: "Summary", icon: LayoutDashboard },
-  { href: "/bracket", label: "Bracket", icon: Activity },
-  { href: "/matches", label: "Matches", icon: CalendarDays },
-  { href: "/agent-log", label: "Agent Log", icon: ListChecks },
-  { href: "/bracket", label: "Teams", icon: Users },
-];
 
 export default function RootLayout({
   children,
@@ -48,22 +34,7 @@ export default function RootLayout({
               </span>
             </Link>
 
-            <nav className="mt-7 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={`${item.href}-${item.label}`}
-                    href={item.href}
-                    className="inline-flex h-11 shrink-0 items-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-semibold text-slate-300 hover:border-blue-400/40 hover:bg-blue-500/15 hover:text-blue-100"
-                  >
-                    <Icon aria-hidden="true" size={17} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+            <SidebarNav />
 
             <div className="mt-8 hidden text-xs text-slate-500 lg:absolute lg:bottom-6 lg:left-5 lg:right-5 lg:block">
               <div>Kyiv time</div>

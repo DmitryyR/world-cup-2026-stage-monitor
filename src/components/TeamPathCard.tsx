@@ -1,6 +1,7 @@
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
+import { getWinMethodLabel } from "@/lib/knockout-display";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { TeamName } from "./TeamName";
 
@@ -46,6 +47,11 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
               {getTeamDisplayName(match.homeTeam)} {formatScore(match)}{" "}
               {getTeamDisplayName(match.awayTeam)}
             </div>
+            {getWinMethodLabel(match) ? (
+              <div className="mt-1 text-xs font-semibold text-emerald-300">
+                {getWinMethodLabel(match)}
+              </div>
+            ) : null}
           </div>
         ))}
         <div className="relative text-sm">

@@ -99,6 +99,7 @@ function RunDetails({
         <RunRow label="Source" value={run.source} />
         <RunRow label="Stage" value={run.detectedStage ? formatStage(run.detectedStage) : "-"} />
         <RunRow label="Changes" value={String(run.changesDetected)} />
+        <RunRow label="Duration" value={formatRunDuration(run.startedAt, run.finishedAt)} />
         <RunRow label="Error" value={run.errorMessage ?? "-"} />
       </dl>
       {bracketValidation ? (
@@ -137,6 +138,29 @@ function RunDetails({
       ) : null}
     </>
   );
+}
+
+function formatRunDuration(startedAt: string, finishedAt: string | null): string {
+  if (!finishedAt) {
+    return "-";
+  }
+
+  const started = new Date(startedAt).getTime();
+  const finished = new Date(finishedAt).getTime();
+
+  if (!Number.isFinite(started) || !Number.isFinite(finished) || finished < started) {
+    return "-";
+  }
+
+  const seconds = Math.round((finished - started) / 1000);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${minutes}m ${remainingSeconds}s`;
 }
 
 function RunRow({ label, value }: { label: string; value: string }) {

@@ -1,4 +1,5 @@
 import type { NormalizedMatch } from "@/domain/types";
+import { resolveKnockoutOutcome } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
 import { getDisplayMatchStatus } from "@/lib/knockout-display";
@@ -26,32 +27,37 @@ export function MatchTable({ matches }: MatchTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10">
-            {matches.map((match) => (
-              <tr key={match.externalId} className="hover:bg-white/[0.03]">
-                <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {formatKyivDateTime(match.kickoffAt)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-200">
-                  {formatStage(match.stage)}
-                </td>
-                <td className="px-4 py-3">
-                  <span className="flex min-w-64 items-center gap-3">
-                    <TeamName teamName={match.homeTeam} />
-                    <span className="text-slate-500">vs</span>
-                    <TeamName teamName={match.awayTeam} />
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 font-semibold text-slate-100">
-                  {formatScore(match)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <StatusBadge status={getDisplayMatchStatus(match)} />
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {match.winner ? getTeamDisplayName(match.winner) : "-"}
-                </td>
-              </tr>
-            ))}
+            {matches.map((match) => {
+              const outcome = resolveKnockoutOutcome(match);
+              const winner = outcome.winner ?? match.winner;
+
+              return (
+                <tr key={match.externalId} className="hover:bg-white/[0.03]">
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-300">
+                    {formatKyivDateTime(match.kickoffAt)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-slate-200">
+                    {formatStage(match.stage)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="flex min-w-64 items-center gap-3">
+                      <TeamName teamName={match.homeTeam} />
+                      <span className="text-slate-500">vs</span>
+                      <TeamName teamName={match.awayTeam} />
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-center font-semibold text-slate-100">
+                    {match.status === "scheduled" ? "-" : formatScore(match)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <StatusBadge status={getDisplayMatchStatus(match)} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-slate-300">
+                    {winner ? getTeamDisplayName(winner) : "-"}
+                  </td>
+                </tr>
+              );
+            })}
             {matches.length === 0 ? (
               <tr>
                 <td className="px-4 py-8 text-center text-slate-500" colSpan={6}>

@@ -25,5 +25,5 @@ export function formatScore(match: NormalizedMatch): string {
     return "-";
   }
 
-  return `${match.homeScore}-${match.awayScore}`;
+  return `${match.homeScore} - ${match.awayScore}`;
 }

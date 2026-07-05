@@ -1,8 +1,7 @@
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import { getDisplayMatchStatus } from "@/lib/knockout-display";
-import { getTeamDisplayName } from "@/lib/team-flags";
+import { getDisplayMatchStatus, getWinMethodLabel } from "@/lib/knockout-display";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
@@ -13,6 +12,7 @@ type MatchCardProps = {
 export function MatchCard({ match }: MatchCardProps) {
   const isFinished = match.status === "finished";
   const status = getDisplayMatchStatus(match);
+  const outcomeLabel = getWinMethodLabel(match);
 
   return (
     <article className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-blue-400/40">
@@ -37,10 +37,10 @@ export function MatchCard({ match }: MatchCardProps) {
       </div>
       <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs leading-snug text-slate-400">
         <span>{formatKyivDateTime(match.kickoffAt)} Kyiv time</span>
-        <span className={match.winner ? "font-semibold text-emerald-300" : ""}>
-          {match.winner
-            ? `Winner: ${getTeamDisplayName(match.winner)}`
-            : formatStage(match.stage)}
+        <span className={outcomeLabel ? "font-semibold text-emerald-300" : ""}>
+          {status === "needs_review"
+            ? "Needs winner review"
+            : outcomeLabel ?? formatStage(match.stage)}
         </span>
       </div>
     </article>

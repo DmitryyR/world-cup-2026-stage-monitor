@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   buildBracketModel,
   formatWinMethodLabel,
@@ -25,7 +26,7 @@ export function BracketBoard({ matches }: BracketBoardProps) {
         </h1>
       </div>
       <div className="overflow-x-auto overscroll-x-contain pb-5">
-        <div className="grid min-w-[1160px] grid-cols-[220px_220px_190px_190px_170px_170px]">
+        <div className="grid min-w-[1320px] grid-cols-6">
           {bracket.rounds.map((round, index) => (
             <BracketRound
               key={round.stage}
@@ -68,6 +69,14 @@ function BracketRound({
           <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-3 text-center text-sm text-slate-500">
             Pending
           </div>
+        ) : null}
+        {round.matches.length > 0 ? (
+          <Link
+            className="flex h-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-semibold text-slate-300 hover:border-blue-400/40 hover:bg-blue-500/15"
+            href="/matches"
+          >
+            View all {round.matches.length} matches
+          </Link>
         ) : null}
       </div>
     </div>
@@ -124,7 +133,7 @@ function BracketMatchCard({
       </div>
       <div className="mt-2.5 text-xs leading-snug text-slate-400">
         {status === "needs_review"
-          ? "Finished match needs winner review"
+          ? match.reviewReason ?? "Finished match needs winner review"
           : winMethod ?? (match.status === "live" ? "Live now" : formatScore(match))}
       </div>
     </article>
