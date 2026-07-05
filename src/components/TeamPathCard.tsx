@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
@@ -10,22 +11,18 @@ import { TeamName } from "./TeamName";
 
 type TeamPathCardProps = {
   matches: NormalizedMatch[];
+  selectedTeam?: string;
+  onSelectedTeamChange?: (team: string) => void;
 };
 
-export function TeamPathCard({ matches }: TeamPathCardProps) {
-  const defaultTeam = useMemo(() => pickTeam(matches), [matches]);
+export function TeamPathCard({
+  matches,
+  selectedTeam: controlledSelectedTeam,
+  onSelectedTeamChange,
+}: TeamPathCardProps) {
   const teamOptions = useMemo(() => getTeamOptions(matches), [matches]);
-  const [chosenTeam, setChosenTeam] = useState("");
-  const selectedTeam = chosenTeam || defaultTeam;
-
-  if (!selectedTeam) {
-    return (
-      <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4">
-        <h2 className="text-sm font-black uppercase text-slate-100">Team Path</h2>
-        <p className="mt-4 text-sm text-slate-400">No accepted team path yet.</p>
-      </section>
-    );
-  }
+  const [localSelectedTeam, setLocalSelectedTeam] = useState("");
+  const selectedTeam = controlledSelectedTeam ?? localSelectedTeam;
 
   const teamMatches = matches
     .filter((match) => match.homeTeam === selectedTeam || match.awayTeam === selectedTeam)
@@ -33,24 +30,31 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
   const finished = teamMatches.filter((match) => match.status === "finished");
   const nextMatch = teamMatches.find((match) => match.status !== "finished") ?? null;
 
+  function updateSelectedTeam(team: string) {
+    if (onSelectedTeamChange) {
+      onSelectedTeamChange(team);
+      return;
+    }
+
+    setLocalSelectedTeam(team);
+  }
+
   return (
     <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-black uppercase text-slate-100">Team Path</h2>
-        <span className="text-xs font-semibold text-blue-300">
-          {chosenTeam ? "Selected" : "Auto-selected"}
-        </span>
+        {selectedTeam ? (
+          <span className="text-xs font-semibold text-blue-300">Selected</span>
+        ) : null}
       </div>
       <label className="mt-4 block">
         <span className="text-xs font-bold uppercase text-slate-500">Choose team</span>
         <select
           className="mt-2 h-10 w-full rounded-md border border-white/10 bg-slate-950/70 px-3 text-sm font-semibold text-slate-100 outline-none focus:border-blue-300/50 focus:ring-2 focus:ring-blue-300/25"
-          onChange={(event) => setChosenTeam(event.target.value)}
-          value={chosenTeam}
+          onChange={(event) => updateSelectedTeam(event.target.value)}
+          value={selectedTeam}
         >
-          <option value="">
-            {defaultTeam ? `Auto: ${getTeamDisplayName(defaultTeam)}` : "Select a team"}
-          </option>
+          <option value="">Select a team</option>
           {teamOptions.map((team) => (
             <option key={team.value} value={team.value}>
               {team.label}
@@ -61,6 +65,13 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
       <p className="mt-2 text-xs text-slate-500">
         Select a team to inspect its route through accepted tournament data.
       </p>
+      {!selectedTeam ? (
+        <div className="mt-4 rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-slate-400">
+          Select a team to view its tournament path.
+        </div>
+      ) : null}
+      {selectedTeam ? (
+        <>
       <div className="mt-4">
         <TeamName teamName={selectedTeam} />
       </div>
@@ -75,11 +86,21 @@ export function TeamPathCard({ matches }: TeamPathCardProps) {
           </div>
           <div className="mt-1 text-slate-300">
             {nextMatch
-              ? `${formatKyivDateTime(nextMatch.kickoffAt)} Kyiv time`
+              ? `${formatOpponent(selectedTeam, nextMatch)} - ${formatKyivDateTime(
+                  nextMatch.kickoffAt,
+                )} Kyiv time`
               : "Pending"}
           </div>
         </div>
       </div>
+      <Link
+        className="mt-4 inline-flex text-xs font-semibold text-blue-300 hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/50"
+        href="/bracket"
+      >
+        View in bracket
+      </Link>
+        </>
+      ) : null}
     </section>
   );
 }
@@ -106,14 +127,6 @@ function TeamPathMatch({ match }: { match: NormalizedMatch }) {
   );
 }
 
-function pickTeam(matches: NormalizedMatch[]): string | null {
-  const latestFinished = [...matches]
-    .filter((match) => match.status === "finished")
-    .sort((first, second) => second.kickoffAt.localeCompare(first.kickoffAt))[0];
-
-  return latestFinished?.winner ?? latestFinished?.homeTeam ?? null;
-}
-
 function getTeamOptions(matches: NormalizedMatch[]): Array<{ value: string; label: string }> {
   const teams = new Map<string, string>();
 
@@ -134,4 +147,10 @@ function getTeamOptions(matches: NormalizedMatch[]): Array<{ value: string; labe
 
 function isPlaceholderLabel(value: string): boolean {
   return /^(winner|loser) of /i.test(value) || value === "Unknown team";
+}
+
+function formatOpponent(selectedTeam: string, match: NormalizedMatch): string {
+  const opponent = match.homeTeam === selectedTeam ? match.awayTeam : match.homeTeam;
+
+  return `Next: ${getTeamDisplayName(opponent)}`;
 }

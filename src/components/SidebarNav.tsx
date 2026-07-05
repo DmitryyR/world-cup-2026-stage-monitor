@@ -3,28 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
-  CalendarDays,
-  LayoutDashboard,
-  ListChecks,
-  Users,
-} from "lucide-react";
-
-const navItems = [
-  { href: "/", label: "Summary", icon: LayoutDashboard, exact: true },
-  { href: "/bracket", label: "Bracket", icon: Activity },
-  { href: "/matches", label: "Matches", icon: CalendarDays },
-  { href: "/bracket", label: "Teams", icon: Users, inactiveAlias: true },
-];
-
-const adminNavItems = [{ href: "/agent-log", label: "Agent Log", icon: ListChecks }];
+  adminNavItems,
+  isNavItemActive,
+  primaryNavItems,
+  type NavItem,
+} from "@/lib/navigation";
 
 export function SidebarNav() {
   const pathname = usePathname();
 
   return (
     <nav className="mt-7 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
-      {navItems.map((item) => (
+      {primaryNavItems.map((item) => (
         <SidebarLink item={item} key={`${item.href}-${item.label}`} pathname={pathname} />
       ))}
       <div className="mt-2 hidden border-t border-white/10 pt-3 lg:block">
@@ -50,14 +40,11 @@ function SidebarLink({
   item,
   pathname,
 }: {
-  item: (typeof navItems)[number] | (typeof adminNavItems)[number];
+  item: NavItem;
   pathname: string;
 }) {
   const Icon = item.icon;
-  const isExact = "exact" in item && item.exact;
-  const isActive =
-    !("inactiveAlias" in item && item.inactiveAlias) &&
-    (isExact ? pathname === item.href : pathname.startsWith(item.href));
+  const isActive = isNavItemActive(item, pathname);
 
   return (
     <Link

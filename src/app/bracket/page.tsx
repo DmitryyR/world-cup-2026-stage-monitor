@@ -82,14 +82,7 @@ export default async function BracketPage() {
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_300px]">
         <BracketBoard matches={matches} />
-        <div className="space-y-4">
-          <DataHealthCard
-            bracketValidation={bracket.validation}
-            latestAcceptedRun={latestAcceptedRun}
-            state={state}
-          />
-          <TeamPathCard matches={matches} />
-        </div>
+        <TeamPathCard matches={matches} />
       </div>
     </div>
   );

@@ -5,7 +5,6 @@ import { DataHealthCard } from "@/components/DataHealthCard";
 import { MatchCard } from "@/components/MatchCard";
 import { MonitorRunButton } from "@/components/MonitorRunButton";
 import { TeamName } from "@/components/TeamName";
-import { TeamPathCard } from "@/components/TeamPathCard";
 import { TopMetricCard } from "@/components/TopMetricCard";
 import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
@@ -98,7 +97,7 @@ export default async function HomePage() {
         </Link>
       </div>
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_380px]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px]">
         <DashboardSection
           href="/matches"
           icon={<Trophy aria-hidden="true" size={18} />}
@@ -123,9 +122,30 @@ export default async function HomePage() {
           </div>
         </DashboardSection>
 
-        <TeamPathCard matches={matches} />
+        <TeamPathCta />
       </div>
     </div>
+  );
+}
+
+function TeamPathCta() {
+  return (
+    <section className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20">
+      <div className="text-xs font-black uppercase tracking-normal text-blue-300">
+        Team Path
+      </div>
+      <h2 className="mt-2 text-xl font-black text-slate-50">Track a team path</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-400">
+        Select a team to see its route through the knockout stage and upcoming
+        bracket context.
+      </p>
+      <Link
+        className="mt-4 inline-flex h-10 items-center rounded-md bg-blue-600 px-4 text-sm font-black text-white hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60"
+        href="/teams"
+      >
+        Select team
+      </Link>
+    </section>
   );
 }
 

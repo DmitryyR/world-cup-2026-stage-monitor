@@ -19,12 +19,12 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
         <table className="min-w-full divide-y divide-white/10 text-sm">
           <thead className="bg-white/[0.03] text-left text-xs font-semibold uppercase tracking-normal text-slate-400">
             <tr>
-              <th className="px-4 py-3">Date (Kyiv time)</th>
-              <th className="px-4 py-3">Stage</th>
-              <th className="px-4 py-3">Teams</th>
-              <th className="px-4 py-3">Score</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Winner</th>
+              <th className="px-4 py-3" scope="col">Date (Kyiv time)</th>
+              <th className="px-4 py-3" scope="col">Stage</th>
+              <th className="px-4 py-3" scope="col">Teams</th>
+              <th className="px-4 py-3" scope="col">Score</th>
+              <th className="px-4 py-3" scope="col">Status</th>
+              <th className="px-4 py-3" scope="col">Winner</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10">
@@ -67,7 +67,7 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                         ) : null}
                       </div>
                     ) : (
-                      "-"
+                      <span className="text-slate-500">TBD</span>
                     )}
                   </td>
                 </tr>
@@ -126,7 +126,7 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                     </span>
                   </>
                 ) : (
-                  "Winner pending"
+                  "Winner: TBD"
                 )}
               </div>
               {resultMethod ? (
