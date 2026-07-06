@@ -110,6 +110,18 @@ npm run lint
 npm run build
 ```
 
+### Reusable Review Skill
+
+The repository includes a reusable Codex skill for product and UX review:
+
+- `skills/product-ux-roast-review/SKILL.md`
+
+Example invocation:
+
+```text
+Use $product-ux-roast-review to audit this web app: https://world-cup-2026-stage-monitor.vercel.app/
+```
+
 ## Stack
 
 - Next.js App Router

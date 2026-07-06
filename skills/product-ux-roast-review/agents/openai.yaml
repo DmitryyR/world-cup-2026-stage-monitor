@@ -1,0 +1,7 @@
+interface:
+  display_name: "Product UX Roast Review"
+  short_description: "Sharp, constructive product and UX app audit."
+  default_prompt: "Use $product-ux-roast-review to audit this web app: <url>"
+
+policy:
+  allow_implicit_invocation: true

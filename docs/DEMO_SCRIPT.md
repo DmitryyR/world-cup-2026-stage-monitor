@@ -20,6 +20,8 @@ From an Agentic Engineering perspective, the key idea is maker/checker separatio
 
 The project also includes context documents like PRD, SDD, AGENTS, EVALS, and DESIGN. Verification is done with `npm run test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
 
+One more part of the process is iterative product review. After UI updates, I run the live site through a custom Codex skill called `product-ux-roast-review`. It reviews functionality, UI/UX, accessibility, responsiveness, and product readiness, then produces concrete issues with severity and recommendations. I use that review to turn feedback into the next implementation tasks instead of guessing what to improve.
+
 The app is deployed on Vercel with Neon Postgres and is available at:
 
 https://world-cup-2026-stage-monitor.vercel.app
