@@ -6,7 +6,7 @@ Dmitry Remar
 
 ## Demo
 
-- Demo video: TODO paste link
+- Demo video :https://www.loom.com/share/cb81485456fb46ed9b47df7ba1e94751
 - Live demo: https://world-cup-2026-stage-monitor.vercel.app
 - GitHub repo: https://github.com/DmitryyR/world-cup-2026-stage-monitor
 
