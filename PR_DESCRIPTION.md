@@ -1,32 +1,33 @@
-# Homework Submission PR
+# Опис PR для здачі домашнього завдання
 
-## Name
+## Імʼя
 
 Dmitry Remar
 
-## Demo
+## Демо
 
-- Demo video :https://www.loom.com/share/cb81485456fb46ed9b47df7ba1e94751
+- Demo video: https://www.loom.com/share/cb81485456fb46ed9b47df7ba1e94751
 - Live demo: https://world-cup-2026-stage-monitor.vercel.app
 - GitHub repo: https://github.com/DmitryyR/world-cup-2026-stage-monitor
 
-## Project Summary
+## Короткий опис проєкту
 
-World Cup 2026 Stage Monitor is a real-data-first tournament monitoring app. It fetches World Cup 2026 match data, normalizes provider payloads, detects the current stage, validates proposed state through a checker, persists only accepted data, and exposes the result through a dashboard, match center, bracket, teams view, and agent log.
+**World Cup 2026 Stage Monitor** - це real-data-first застосунок для моніторингу стану Чемпіонату світу 2026. Він отримує дані про матчі, нормалізує provider payload, визначає поточну стадію турніру, перевіряє запропонований стан через checker, зберігає тільки accepted data і показує результат через dashboard, match center, bracket, teams view та agent log.
 
-## Agentic Practices Used
+## Agentic Engineering практики
 
-- Context engineering with PRD, SDD, AGENTS, EVALS, DESIGN, and ADR docs.
-- Maker/checker separation between fetching/normalizing/stage detection and validation.
-- Monitor loop that logs failed and successful runs.
-- Provider abstraction with mock and real provider support.
-- Real provider integration using `worldcup26.ir`.
-- Tests and verification for detector, checker, providers, monitor loop, UI helpers, and bracket layout.
-- Deployment verification on Vercel with Neon Postgres.
+- Context engineering через PRD, SDD, AGENTS, EVALS, DESIGN і ADR docs.
+- Maker/checker separation між fetching/normalization/stage detection та validation.
+- Monitor loop, який логує успішні й невдалі запуски.
+- Provider abstraction із mock і real provider.
+- Real provider integration через `worldcup26.ir`.
+- Tests і verification для detector, checker, providers, monitor loop, UI helpers і bracket layout.
+- Deployment verification на Vercel із Neon Postgres.
+- Custom Codex skill `product-ux-roast-review` для ітеративного UX/product review.
 
-## What I Controlled As The Human Engineer
+## Що я контролював як human engineer
 
-- Product goal and scope.
+- Product goal і scope.
 - Architecture constraints.
 - Acceptance criteria.
 - Provider strategy.
@@ -35,20 +36,21 @@ World Cup 2026 Stage Monitor is a real-data-first tournament monitoring app. It 
 - Verification requirements.
 - Final submission packaging.
 
-## What Codex / AI Helped Implement
+## Що допоміг реалізувати Codex / AI
 
-- Domain model and schemas.
-- Provider adapters and mappers.
-- Stage detector and checker tests.
-- Monitor loop and persistence flow.
-- API routes and repository layer.
-- Dashboard, matches, bracket, teams, and agent log UI.
+- Domain model і schemas.
+- Provider adapters і mappers.
+- Stage detector і checker tests.
+- Monitor loop і persistence flow.
+- API routes і repository layer.
+- Dashboard, matches, bracket, teams і agent log UI.
 - Vercel/Neon deployment fixes.
-- Documentation and PR summary.
+- Documentation і PR summary.
+- Product/UX review skill для повторного аудиту сайту.
 
-## Verification Evidence
+## Verification evidence
 
-Final commands:
+Фінальні команди:
 
 ```bash
 npm run test
@@ -57,19 +59,19 @@ npm run lint
 npm run build
 ```
 
-Expected result: all commands pass.
+Очікуваний результат: усі команди проходять успішно.
 
-## Known Limitations
+## Відомі обмеження
 
-- `worldcup26.ir` is not official FIFA data.
-- Live provider data may be delayed or incomplete.
-- Run Monitor is manual, not scheduled.
-- Bracket visual QA could be improved with screenshot automation.
-- Raw provider payload is serialized text for portability.
+- `worldcup26.ir` не є офіційним FIFA API.
+- Live provider data може бути затриманою або неповною.
+- Run Monitor запускається вручну, а не за розкладом.
+- Bracket visual QA можна покращити через screenshot automation.
+- Raw provider payload зберігається як serialized text для portability.
 
 ## Screenshots
 
-TODO add screenshots if required:
+TODO додати screenshots, якщо потрібно:
 
 - Summary dashboard
 - Match Center

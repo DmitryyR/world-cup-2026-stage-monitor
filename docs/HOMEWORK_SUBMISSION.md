@@ -1,40 +1,40 @@
-# fwdays Academy Agentic Engineering Homework Submission
+# Здача домашнього завдання fwdays Academy Agentic Engineering
 
-## Student
+## Студент
 
 Dmitry Remar
 
-## Project
+## Проєкт
 
 World Cup 2026 Stage Monitor
 
-## Links
+## Посилання
 
 - Live demo: https://world-cup-2026-stage-monitor.vercel.app
 - GitHub repo: https://github.com/DmitryyR/world-cup-2026-stage-monitor
-- Demo video: TODO paste link
+- Demo video: TODO вставити посилання
 
-## What Was Built
+## Що було побудовано
 
-A real-data-first tournament monitoring app for FIFA World Cup 2026. The app fetches provider match data, normalizes it, detects the current tournament stage, validates the proposed state through a checker, persists only accepted data, and presents the result in a dashboard UI.
+Я побудував real-data-first застосунок для моніторингу стану Чемпіонату світу 2026. Застосунок отримує дані про матчі від провайдера, нормалізує їх, визначає поточну стадію турніру, перевіряє запропонований стан через checker, зберігає тільки прийняті дані та показує результат у dashboard.
 
-Main product surfaces:
+Основні частини продукту:
 
 - Summary dashboard
 - Match Center
-- Coordinate-based knockout bracket
-- Teams and Team Path
+- Knockout bracket
+- Teams і Team Path
 - Agent Log
 - Run Monitor action
 - Data health diagnostics
 
-## Why This Project Was Chosen
+## Чому я обрав цей проєкт
 
-Tournament monitoring is a good Agentic Engineering homework problem because the data can be messy, time-dependent, and externally sourced. A simple direct-fetch UI would be fragile. This project needs a disciplined pipeline where maker agents propose state and a checker validates it before publication.
+Моніторинг турніру добре підходить для демонстрації Agentic Engineering, бо дані можуть бути неповними, затриманими, залежними від часу або представленими у provider-specific форматі. Простий UI, який напряму читає live API, був би крихким. Тому тут потрібен контрольований pipeline, де maker-частина пропонує стан, а checker окремо перевіряє його перед публікацією.
 
-## How It Demonstrates Agentic Engineering
+## Як проєкт демонструє Agentic Engineering
 
-The project uses a maker/checker pipeline:
+У проєкті є maker/checker pipeline:
 
 ```text
 Fetcher Agent
@@ -45,50 +45,52 @@ Fetcher Agent
 -> AgentRun Log
 ```
 
-The maker side fetches, maps, and proposes. The checker side validates and can reject. The monitor loop logs both success and failure. The UI reads accepted persisted state instead of trusting live provider responses directly.
+Maker-частина отримує, мапить і пропонує стан турніру. Checker-частина перевіряє консистентність і може відхилити результат. Monitor loop логує як успішні, так і невдалі запуски. UI читає тільки прийнятий persisted state, а не довіряє live provider response напряму.
 
-## Human Decisions
+## Що вирішував я як human engineer
 
-As the human engineer, I controlled:
+Я контролював:
 
-- product scope and the PRD;
-- decision to use a maker/checker pipeline;
-- decision to keep provider logic separate from domain validation;
-- decision to persist only accepted state;
-- selection of the real provider strategy;
-- UI acceptance criteria and dashboard direction;
-- deployment target: Vercel with Neon Postgres;
-- final verification checklist.
+- продуктову ідею та scope;
+- PRD і acceptance criteria;
+- рішення використати maker/checker pipeline;
+- рішення тримати provider logic окремо від domain validation;
+- правило зберігати тільки accepted state;
+- real provider strategy;
+- напрям UI та dashboard;
+- deployment target: Vercel + Neon Postgres;
+- фінальний verification checklist.
 
-## What Was Delegated To AI / Codex
+## Що було делеговано AI / Codex
 
-Codex helped implement and iterate on:
+Codex допомагав реалізовувати та ітерувати:
 
 - TypeScript domain model;
 - Zod schemas;
 - provider adapters;
 - monitor loop;
-- tests and eval coverage;
-- Prisma repository and API routes;
+- tests і eval coverage;
+- Prisma repository та API routes;
 - dashboard UI;
 - bracket layout;
 - Vercel/Neon deployment fixes;
-- README and submission documentation.
+- README і submission documentation.
 
-All changes were guided by explicit constraints such as not bypassing the checker, not hardcoding results, and keeping UI reads on accepted persisted data.
+Усі зміни виконувалися з явними обмеженнями: не bypass-ити checker, не hardcode-ити результати, не міняти provider logic без потреби, і тримати UI на accepted persisted data.
 
-## Agentic Practices Used
+## Agentic practices
 
-- Context engineering through `AGENTS.md`, `PRD.md`, `PRD-v2.md`, `SDD.md`, `EVALS.md`, and `DESIGN.md`.
-- Loop engineering through iterative implementation and repeated verification.
-- Maker/checker separation across agents and domain logic.
-- Tests before and during feature work.
-- Provider abstraction with mock and real providers.
-- Real-data provider through `worldcup26.ir`.
-- Deployment verification with Vercel and Neon Postgres.
-- CodeRabbit review readiness through focused docs, PR description, tests, and clear constraints.
+- Context engineering через `AGENTS.md`, `PRD.md`, `PRD-v2.md`, `SDD.md`, `EVALS.md` і `DESIGN.md`.
+- Loop engineering через ітеративну реалізацію та повторну верифікацію.
+- Maker/checker separation між agent pipeline і domain validation.
+- Tests before/during feature work.
+- Provider abstraction із mock і real provider.
+- Real-data provider через `worldcup26.ir`.
+- Deployment verification через Vercel і Neon Postgres.
+- Custom UX/product review skill `product-ux-roast-review`.
+- CodeRabbit review readiness через документацію, PR description, tests і чіткі constraints.
 
-## Final Verification Checklist
+## Фінальний verification checklist
 
 - [x] `npm run test`
 - [x] `npm run typecheck`
@@ -103,10 +105,10 @@ All changes were guided by explicit constraints such as not bypassing the checke
 - [x] Run Monitor preserved
 - [x] No secrets committed
 
-## Remaining Limitations
+## Обмеження
 
-- `worldcup26.ir` is a community/open-source provider, not official FIFA data.
-- Live provider data may be delayed or incomplete.
-- Monitor execution is manual through the UI, not scheduled.
-- Bracket visual QA could be improved with automated browser screenshots.
-- Raw provider payload is stored as serialized text for auditability, not as queryable JSON.
+- `worldcup26.ir` є community/open-source provider, не офіційним FIFA API.
+- Live provider data може бути затриманою або неповною.
+- Monitor execution запускається вручну через UI, а не за розкладом.
+- Bracket visual QA можна покращити через automated browser screenshots.
+- Raw provider payload зберігається як serialized text для auditability, а не як queryable JSON.

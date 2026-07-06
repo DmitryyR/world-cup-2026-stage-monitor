@@ -1,29 +1,29 @@
-# Demo Script
+# Сценарій демо
 
-## 1-2 Minute Video Walkthrough
+## Відео на 1-2 хвилини
 
-Hi, my name is Dmitry Remar. This is **World Cup 2026 Stage Monitor**, my fwdays Academy Agentic Engineering homework project.
+Привіт, мене звати Дмитро Ремар. Це мій проєкт для домашнього завдання fwdays Academy Agentic Engineering - **World Cup 2026 Stage Monitor**.
 
-The app monitors World Cup 2026 tournament state from real provider data. It detects the current stage, validates the result through a checker, persists only accepted data, and shows the result in a dashboard.
+Застосунок відстежує стан Чемпіонату світу 2026 на основі реальних даних від провайдера. Він визначає поточну стадію турніру, перевіряє результат через checker, зберігає тільки прийняті дані й показує їх у dashboard.
 
-First, on the **Summary** page, I can see tournament progress, current stage, live match status, next match, latest results, upcoming matches, and compact data health.
+Спочатку на сторінці **Summary** видно прогрес турніру, поточну стадію, live-статус, наступний матч, останні результати, майбутні матчі та короткий стан якості даних.
 
-Next, the **Matches** page shows accepted matches from the database. It includes filters for live, today, finished, scheduled, current stage, and a team search.
+Далі сторінка **Matches** показує прийняті матчі з бази даних. Тут є фільтри для live, today, finished, scheduled, current stage, а також пошук за командою.
 
-The **Bracket** page shows the knockout tree. It uses normalized match data, readable team labels, status badges, scores, and win methods like penalties or regular-time wins.
+Сторінка **Bracket** показує knockout-дерево турніру. Воно використовує нормалізовані матчі, зрозумілі назви команд, статуси, рахунки й спосіб перемоги, наприклад пенальті або перемогу в основний час.
 
-The **Agent Log** shows monitor runs. This is important because failed provider or checker runs are logged, but they do not overwrite the last accepted public state.
+Сторінка **Agent Log** показує запуски monitor loop. Це важливо, бо невдалі запуски провайдера або checker-а логуються, але не перезаписують останній прийнятий публічний стан.
 
-If I click **Run Monitor**, the app runs the pipeline: Fetcher Agent, Normalizer Agent, Stage Detector Agent, Checker Agent, and then persistence only if the checker passes.
+Якщо натиснути **Run Monitor**, застосунок запускає pipeline: Fetcher Agent, Normalizer Agent, Stage Detector Agent, Checker Agent, і тільки після успішної перевірки зберігає дані.
 
-From an Agentic Engineering perspective, the key idea is maker/checker separation. Maker agents propose data and state. The checker validates business rules such as scheduled matches not having winners, finished matches requiring scores, no champion before the final, and no stage regression.
+З точки зору Agentic Engineering, ключова ідея тут - розділення maker/checker. Maker-частина пропонує дані та стан турніру. Checker окремо перевіряє бізнес-правила: scheduled matches не мають переможців, finished matches повинні мати рахунок, чемпіон не може зʼявитися до фіналу, а стадія турніру не має регресувати.
 
-The project also includes context documents like PRD, SDD, AGENTS, EVALS, and DESIGN. Verification is done with `npm run test`, `npm run typecheck`, `npm run lint`, and `npm run build`.
+У проєкті також є контекстні документи: PRD, SDD, AGENTS, EVALS і DESIGN. Верифікація виконується через `npm run test`, `npm run typecheck`, `npm run lint` і `npm run build`.
 
-One more part of the process is iterative product review. After UI updates, I run the live site through a custom Codex skill called `product-ux-roast-review`. It reviews functionality, UI/UX, accessibility, responsiveness, and product readiness, then produces concrete issues with severity and recommendations. I use that review to turn feedback into the next implementation tasks instead of guessing what to improve.
+Ще одна частина процесу - ітеративне продуктове ревʼю. Після UI-оновлень я проганяю live-сайт через власний Codex skill `product-ux-roast-review`. Він перевіряє функціональність, UI/UX, accessibility, responsive design і product readiness, а потім формує конкретні issues із severity та рекомендаціями. Далі я перетворюю цей фідбек на задачі для наступної ітерації, замість того щоб просто вгадувати, що покращувати.
 
-The app is deployed on Vercel with Neon Postgres and is available at:
+Застосунок задеплоєний на Vercel із Neon Postgres і доступний за посиланням:
 
 https://world-cup-2026-stage-monitor.vercel.app
 
-That is the final demo of World Cup 2026 Stage Monitor.
+Це фінальне демо **World Cup 2026 Stage Monitor**.
