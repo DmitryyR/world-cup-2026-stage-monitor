@@ -44,6 +44,13 @@ export type CheckerResult =
       errors: string[];
     };
 
+export type ProviderDiagnostic = {
+  severity: "warning";
+  code: string;
+  message: string;
+  matchId?: string;
+};
+
 export type RawProviderMatch = {
   id: string;
   round: string;
@@ -61,6 +68,7 @@ export type RawProviderPayload = {
   fetchedAt: string;
   matches: RawProviderMatch[];
   rawProviderPayload?: unknown;
+  diagnostics?: ProviderDiagnostic[];
 };
 
 export type AgentRunRecord = {

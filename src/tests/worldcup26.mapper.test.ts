@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizeProviderPayload } from "@/domain/normalizer";
+import { formatKyivDateTime } from "@/lib/date-format";
 import {
   mapWorldCup26GameToRawProviderMatch,
   mapWorldCup26ResponseToRawProviderPayload,
@@ -86,6 +87,60 @@ describe("worldcup26 mapper", () => {
     expect(match?.awayTeam).toBe("Winner Match 102");
     expect(match?.winner).toBeNull();
     expect(match?.status).toBe("scheduled");
+  });
+
+  it("converts timezone-less local_date from source timezone into UTC and Kyiv time", () => {
+    const match = mapWorldCup26GameToRawProviderMatch(
+      makeWorldCup26Game({
+        id: "arg-egy",
+        type: "r16",
+        local_date: "07/07/2026 12:00",
+        home_team_name_en: "Argentina",
+        away_team_name_en: "Egypt",
+      }),
+    );
+
+    expect(match.kickoffAt).toBe("2026-07-07T16:00:00.000Z");
+    expect(formatKyivDateTime(match.kickoffAt)).toBe("Jul 7, 2026, 7:00 PM");
+  });
+
+  it("adds diagnostics when provider local dates require a timezone assumption", () => {
+    const payload = mapWorldCup26ResponseToRawProviderPayload({
+      games: [
+        makeWorldCup26Game({
+          id: "arg-egy",
+          local_date: "07/07/2026 12:00",
+        }),
+      ],
+    });
+
+    expect(payload.diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "warning",
+        code: "assumed_source_timezone",
+        matchId: "arg-egy",
+      }),
+    );
+  });
+
+  it("keeps normalized kickoff sorting stable after source timezone conversion", () => {
+    const payload = mapWorldCup26ResponseToRawProviderPayload({
+      games: [
+        makeWorldCup26Game({
+          id: "later",
+          local_date: "07/07/2026 13:00",
+        }),
+        makeWorldCup26Game({
+          id: "earlier",
+          local_date: "07/07/2026 12:00",
+        }),
+      ],
+    });
+    const sortedMatchIds = normalizeProviderPayload(payload)
+      .sort((first, second) => first.kickoffAt.localeCompare(second.kickoffAt))
+      .map((match) => match.externalId);
+
+    expect(sortedMatchIds).toEqual(["earlier", "later"]);
   });
 
   it("missing scores do not create fake winners or finished status", () => {

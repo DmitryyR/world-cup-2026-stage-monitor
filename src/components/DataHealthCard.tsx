@@ -27,6 +27,8 @@ export function DataHealthCard({
   const syncedLabel = state
     ? `${formatKyivDateTime(state.lastCheckedAt)} Kyiv time`
     : "Not run";
+  const providerWarning =
+    latestAcceptedRun?.status === "passed" ? latestAcceptedRun.errorMessage : null;
 
   if (compact) {
     return (
@@ -41,6 +43,11 @@ export function DataHealthCard({
           <StatusBadge status={displayStatus} />
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-400">Synced {syncedLabel}</p>
+        {providerWarning ? (
+          <p className="mt-2 text-xs font-semibold leading-5 text-amber-200">
+            {providerWarning}
+          </p>
+        ) : null}
         <Link
           className="mt-2 inline-flex text-xs font-semibold text-blue-300 hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/50"
           href="/agent-log"
@@ -71,6 +78,14 @@ export function DataHealthCard({
             {syncedLabel}
           </dd>
         </div>
+        {providerWarning ? (
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate-400">Provider warning</dt>
+            <dd className="max-w-64 text-right font-semibold text-amber-200">
+              {providerWarning}
+            </dd>
+          </div>
+        ) : null}
         {bracketValidation && !compact ? (
           <>
             <div className="flex justify-between gap-4">

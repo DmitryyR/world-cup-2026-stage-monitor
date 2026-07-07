@@ -1,4 +1,10 @@
-import type { RawProviderMatch, RawProviderPayload, TournamentStage } from "@/domain/types";
+import type {
+  ProviderDiagnostic,
+  RawProviderMatch,
+  RawProviderPayload,
+  TournamentStage,
+} from "@/domain/types";
+import { parseWorldCup26LocalDateToUtc } from "@/lib/date-time";
 import type { WorldCup26Game, WorldCup26Response } from "./worldcup26.schemas";
 
 type WorldCup26Diagnostics = {
@@ -29,19 +35,29 @@ export function mapWorldCup26ResponseToRawProviderPayload(
     );
   }
 
-  const matches = response.games.map(mapWorldCup26GameToRawProviderMatch);
+  const mappedGames = response.games.map(mapWorldCup26GameWithDiagnostics);
+  const matches = mappedGames.map((mappedGame) => mappedGame.match);
+  const diagnostics = mappedGames.flatMap((mappedGame) => mappedGame.diagnostics);
 
   return {
     source: "worldcup26",
     fetchedAt,
     matches,
     rawProviderPayload: response,
+    diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
   };
 }
 
 export function mapWorldCup26GameToRawProviderMatch(
   game: WorldCup26Game,
 ): RawProviderMatch {
+  return mapWorldCup26GameWithDiagnostics(game).match;
+}
+
+function mapWorldCup26GameWithDiagnostics(game: WorldCup26Game): {
+  match: RawProviderMatch;
+  diagnostics: ProviderDiagnostic[];
+} {
   const stage = mapWorldCup26TypeToStage(game.type);
   const status = mapWorldCup26Status(game);
   const homeScore = parseOptionalScore(game.home_score);
@@ -50,20 +66,35 @@ export function mapWorldCup26GameToRawProviderMatch(
   const awayTeam = getTeamName(game.away_team_name_en, game.away_team_label, "TBD Away");
   const hasBothScores = homeScore !== null && awayScore !== null;
   const safeStatus = status === "finished" && !hasBothScores ? "live" : status;
+  const externalId = getExternalId(game);
+  const parsedKickoff = parseWorldCup26LocalDateToUtc(game.local_date);
+  const diagnostics: ProviderDiagnostic[] = parsedKickoff.warning
+    ? [
+        {
+          severity: "warning",
+          code: "assumed_source_timezone",
+          message: parsedKickoff.warning,
+          matchId: externalId,
+        },
+      ]
+    : [];
 
   return {
-    id: getExternalId(game),
-    round: stage,
-    home: homeTeam,
-    away: awayTeam,
-    homeScore: safeStatus === "scheduled" ? null : homeScore,
-    awayScore: safeStatus === "scheduled" ? null : awayScore,
-    status: safeStatus,
-    kickoffAt: parseWorldCup26LocalDate(game.local_date),
-    winner:
-      safeStatus === "finished" && hasBothScores
-        ? getWinner(homeTeam, awayTeam, homeScore, awayScore)
-        : null,
+    match: {
+      id: externalId,
+      round: stage,
+      home: homeTeam,
+      away: awayTeam,
+      homeScore: safeStatus === "scheduled" ? null : homeScore,
+      awayScore: safeStatus === "scheduled" ? null : awayScore,
+      status: safeStatus,
+      kickoffAt: parsedKickoff.utcInstant,
+      winner:
+        safeStatus === "finished" && hasBothScores
+          ? getWinner(homeTeam, awayTeam, homeScore, awayScore)
+          : null,
+    },
+    diagnostics,
   };
 }
 
@@ -200,24 +231,6 @@ function parseOptionalScore(value: unknown): number | null {
   }
 
   return parsed;
-}
-
-function parseWorldCup26LocalDate(value: string): string {
-  const match = value.match(
-    /^(?<month>\d{1,2})\/(?<day>\d{1,2})\/(?<year>\d{4}) (?<hour>\d{1,2}):(?<minute>\d{2})$/,
-  );
-
-  if (!match?.groups) {
-    throw new Error(`Invalid worldcup26 local_date: ${value}`);
-  }
-
-  const month = Number(match.groups.month);
-  const day = Number(match.groups.day);
-  const year = Number(match.groups.year);
-  const hour = Number(match.groups.hour);
-  const minute = Number(match.groups.minute);
-
-  return new Date(Date.UTC(year, month - 1, day, hour, minute)).toISOString();
 }
 
 function getTeamName(

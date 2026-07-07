@@ -48,9 +48,17 @@ export const rawProviderMatchSchema = z.object({
   winner: z.string().min(1).nullable().optional(),
 });
 
+export const providerDiagnosticSchema = z.object({
+  severity: z.literal("warning"),
+  code: z.string().min(1),
+  message: z.string().min(1),
+  matchId: z.string().min(1).optional(),
+});
+
 export const rawProviderPayloadSchema = z.object({
   source: z.string().min(1),
   fetchedAt: z.string().datetime(),
   matches: z.array(rawProviderMatchSchema),
   rawProviderPayload: z.unknown().optional(),
+  diagnostics: z.array(providerDiagnosticSchema).optional(),
 });

@@ -170,6 +170,42 @@ describe("runMonitorLoop", () => {
     expect(runs[0]?.errorMessage).toBe("provider unavailable");
   });
 
+  it("logs provider timezone diagnostics without rejecting accepted data", async () => {
+    const repository = new InMemoryTournamentRepository();
+
+    const result = await runMonitorWithPayload(
+      {
+        ...makePayload([
+          {
+            id: "arg-egy",
+            round: "round_of_16",
+            home: "Argentina",
+            away: "Egypt",
+            status: "scheduled",
+            kickoffAt: "2026-07-07T16:00:00.000Z",
+            winner: null,
+          },
+        ], "worldcup26"),
+        diagnostics: [
+          {
+            severity: "warning",
+            code: "assumed_source_timezone",
+            message:
+              "worldcup26 local_date has no timezone offset; assumed America/New_York before UTC/Kyiv conversion",
+            matchId: "arg-egy",
+          },
+        ],
+      },
+      repository,
+    );
+
+    const runs = await repository.getAgentRuns();
+
+    expect(result.status).toBe("passed");
+    expect(runs[0]?.checkerResult).toBe("passed");
+    expect(runs[0]?.errorMessage).toContain("assumed America/New_York");
+  });
+
   it("persists valid worldcup26 fixture data", async () => {
     const repository = new InMemoryTournamentRepository();
     const provider: TournamentDataProvider = {

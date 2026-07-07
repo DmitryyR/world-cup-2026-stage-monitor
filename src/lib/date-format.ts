@@ -1,4 +1,4 @@
-const KYIV_TIME_ZONE = "Europe/Kyiv";
+import { KYIV_TIME_ZONE } from "./date-time";
 const APP_LOCALE = "en-US";
 
 export function formatKyivDateTime(date: string | Date | null | undefined): string {

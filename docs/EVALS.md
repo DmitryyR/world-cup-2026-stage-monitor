@@ -40,6 +40,7 @@ npm run build
 | E21 | Finished tied knockout with penalties | Bracket/result formatting shows penalty winner and method. |
 | E22 | Future placeholder participants | UI shows `Winner of Team A vs Team B` or `TBD`, never raw provider tokens. |
 | E23 | Bracket coordinate layout | Left/right halves feed into center Final; semifinal losers feed Bronze Final. |
+| E24 | WorldCup26 timezone-less kickoff | Mapper assumes the documented source timezone, stores UTC, displays Europe/Kyiv time, and logs a provider warning. |
 
 ## Business Rules Checked
 
@@ -63,6 +64,7 @@ npm run build
 - Failed runs are logged in Agent Log.
 - Failed runs do not publish matches or tournament state.
 - Real-provider tests should use fixtures or mocked fetch, not live network calls.
+- Provider kickoff times without explicit offsets must be converted through a named source timezone and surfaced as warnings.
 
 ## UI / Product Quality Checks
 

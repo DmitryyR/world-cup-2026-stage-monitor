@@ -2,7 +2,12 @@ import { checkerAgent } from "./checker-agent";
 import { fetcherAgent } from "./fetcher-agent";
 import { normalizerAgent } from "./normalizer-agent";
 import { stageDetectorAgent } from "./stage-detector-agent";
-import type { NormalizedMatch, RawProviderPayload, TournamentState } from "@/domain/types";
+import type {
+  NormalizedMatch,
+  ProviderDiagnostic,
+  RawProviderPayload,
+  TournamentState,
+} from "@/domain/types";
 import type { TournamentDataProvider } from "@/providers/provider";
 import type { TournamentRepository } from "@/lib/repository";
 
@@ -40,6 +45,7 @@ export async function runMonitorLoop({
     const previousMatches = await repository.getMatches();
     const rawPayload = await fetcherAgent(provider);
     source = rawPayload.source;
+    const providerWarningMessage = formatProviderWarnings(rawPayload.diagnostics ?? []);
     const matches = normalizerAgent(rawPayload);
     changesDetected = countDetectedChanges(previousMatches, matches);
     proposedState = stageDetectorAgent(matches);
@@ -84,7 +90,7 @@ export async function runMonitorLoop({
       changesDetected,
       checkerResult: "passed",
       detectedStage: proposedState.currentStage,
-      errorMessage: null,
+      errorMessage: providerWarningMessage,
     });
 
     return {
@@ -113,6 +119,21 @@ export async function runMonitorLoop({
       errors: [message],
     };
   }
+}
+
+function formatProviderWarnings(diagnostics: ProviderDiagnostic[]): string | null {
+  const warnings = diagnostics.filter((diagnostic) => diagnostic.severity === "warning");
+
+  if (warnings.length === 0) {
+    return null;
+  }
+
+  const firstWarning = warnings[0];
+  const suffix = warnings.length > 1 ? ` (+${warnings.length - 1} more)` : "";
+
+  return firstWarning
+    ? `Provider warning: ${firstWarning.message}${suffix}`
+    : "Provider warning";
 }
 
 function countDetectedChanges(

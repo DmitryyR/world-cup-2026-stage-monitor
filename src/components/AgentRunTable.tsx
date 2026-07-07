@@ -50,7 +50,7 @@ export function AgentRunTable({ runs, bracketValidation }: AgentRunTableProps) {
                     <th className="px-3 py-2">Checker</th>
                     <th className="px-3 py-2">Stage</th>
                     <th className="px-3 py-2">Changes</th>
-                    <th className="px-3 py-2">Error</th>
+                    <th className="px-3 py-2">Message</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
@@ -100,7 +100,10 @@ function RunDetails({
         <RunRow label="Stage" value={run.detectedStage ? formatStage(run.detectedStage) : "-"} />
         <RunRow label="Changes" value={String(run.changesDetected)} />
         <RunRow label="Duration" value={formatRunDuration(run.startedAt, run.finishedAt)} />
-        <RunRow label="Error" value={run.errorMessage ?? "-"} />
+        <RunRow
+          label={run.status === "passed" ? "Warning" : "Error"}
+          value={run.errorMessage ?? "-"}
+        />
       </dl>
       {bracketValidation ? (
         <div className="mt-5 rounded-lg border border-white/10 bg-slate-950/45 p-4 text-sm">
