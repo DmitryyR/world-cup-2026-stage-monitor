@@ -16,6 +16,9 @@ export function AgentRunTable({ runs, bracketValidation }: AgentRunTableProps) {
   const [showPreviousRuns, setShowPreviousRuns] = useState(false);
   const latestRun = runs[0] ?? null;
   const previousRuns = runs.slice(1);
+  const previousRunsWithChanges = previousRuns.filter(
+    (run) => run.changesDetected > 0,
+  );
 
   return (
     <section className="space-y-4">
@@ -38,42 +41,48 @@ export function AgentRunTable({ runs, bracketValidation }: AgentRunTableProps) {
             onClick={() => setShowPreviousRuns((value) => !value)}
             type="button"
           >
-            Show previous runs ({previousRuns.length})
+            Show previous runs with changes ({previousRunsWithChanges.length})
             <span className="text-slate-400">{showPreviousRuns ? "Hide" : "Open"}</span>
           </button>
           {showPreviousRuns ? (
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-white/10 text-sm">
-                <thead className="text-left text-xs uppercase text-slate-400">
-                  <tr>
-                    <th className="px-3 py-2">Started</th>
-                    <th className="px-3 py-2">Checker</th>
-                    <th className="px-3 py-2">Stage</th>
-                    <th className="px-3 py-2">Changes</th>
-                    <th className="px-3 py-2">Message</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {previousRuns.map((run) => (
-                    <tr key={run.id}>
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-300">
-                        {formatKyivDateTime(run.startedAt)}
-                      </td>
-                      <td className="px-3 py-2">
-                        <StatusBadge status={run.checkerResult} />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-300">
-                        {run.detectedStage ? formatStage(run.detectedStage) : "-"}
-                      </td>
-                      <td className="px-3 py-2 text-slate-300">{run.changesDetected}</td>
-                      <td className="max-w-xs px-3 py-2 text-slate-400">
-                        {run.errorMessage ?? "-"}
-                      </td>
+            previousRunsWithChanges.length > 0 ? (
+              <div className="mt-4 overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-sm">
+                  <thead className="text-left text-xs uppercase text-slate-400">
+                    <tr>
+                      <th className="px-3 py-2">Started</th>
+                      <th className="px-3 py-2">Checker</th>
+                      <th className="px-3 py-2">Stage</th>
+                      <th className="px-3 py-2">Changes</th>
+                      <th className="px-3 py-2">Message</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {previousRunsWithChanges.map((run) => (
+                      <tr key={run.id}>
+                        <td className="whitespace-nowrap px-3 py-2 text-slate-300">
+                          {formatKyivDateTime(run.startedAt)}
+                        </td>
+                        <td className="px-3 py-2">
+                          <StatusBadge status={run.checkerResult} />
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-slate-300">
+                          {run.detectedStage ? formatStage(run.detectedStage) : "-"}
+                        </td>
+                        <td className="px-3 py-2 text-slate-300">{run.changesDetected}</td>
+                        <td className="max-w-xs px-3 py-2 text-slate-400">
+                          {run.errorMessage ?? "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-slate-400">
+                No previous runs with detected changes.
+              </p>
+            )
           ) : null}
         </div>
       ) : null}
