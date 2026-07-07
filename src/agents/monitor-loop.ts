@@ -47,7 +47,9 @@ export async function runMonitorLoop({
     source = rawPayload.source;
     const providerWarningMessage = formatProviderWarnings(rawPayload.diagnostics ?? []);
     const matches = normalizerAgent(rawPayload);
-    changesDetected = countDetectedChanges(previousMatches, matches);
+    const detectedChanges = collectDetectedChanges(previousMatches, matches);
+    changesDetected = detectedChanges.length;
+    const changesMessage = formatDetectedChanges(detectedChanges, previousMatches.length);
     proposedState = stageDetectorAgent(matches);
 
     const checkerResult = checkerAgent(
@@ -90,7 +92,7 @@ export async function runMonitorLoop({
       changesDetected,
       checkerResult: "passed",
       detectedStage: proposedState.currentStage,
-      errorMessage: providerWarningMessage,
+      errorMessage: combineRunMessages(changesMessage, providerWarningMessage),
     });
 
     return {
@@ -121,6 +123,41 @@ export async function runMonitorLoop({
   }
 }
 
+type DetectedChange = {
+  matchLabel: string;
+  details: string[];
+};
+
+function combineRunMessages(
+  changesMessage: string | null,
+  providerWarningMessage: string | null,
+): string | null {
+  return [changesMessage, providerWarningMessage].filter(Boolean).join(" | ") || null;
+}
+
+function formatDetectedChanges(
+  changes: DetectedChange[],
+  previousMatchCount: number,
+): string | null {
+  if (changes.length === 0) {
+    return null;
+  }
+
+  if (previousMatchCount === 0) {
+    return `Initial snapshot accepted: ${changes.length} matches.`;
+  }
+
+  const visibleChanges = changes.slice(0, 3);
+  const suffix = changes.length > visibleChanges.length
+    ? ` (+${changes.length - visibleChanges.length} more)`
+    : "";
+  const summary = visibleChanges
+    .map((change) => `${change.matchLabel}: ${change.details.join(", ")}`)
+    .join("; ");
+
+  return `Changes: ${summary}${suffix}`;
+}
+
 function formatProviderWarnings(diagnostics: ProviderDiagnostic[]): string | null {
   const warnings = diagnostics.filter((diagnostic) => diagnostic.severity === "warning");
 
@@ -136,31 +173,107 @@ function formatProviderWarnings(diagnostics: ProviderDiagnostic[]): string | nul
     : "Provider warning";
 }
 
-function countDetectedChanges(
+function collectDetectedChanges(
   previousMatches: NormalizedMatch[],
   nextMatches: NormalizedMatch[],
-): number {
+): DetectedChange[] {
   const previousById = new Map(
-    previousMatches.map((match) => [match.externalId, stableMatchJson(match)]),
+    previousMatches.map((match) => [match.externalId, match]),
+  );
+  const nextById = new Map(
+    nextMatches.map((match) => [match.externalId, match]),
   );
 
-  return nextMatches.filter(
-    (match) => previousById.get(match.externalId) !== stableMatchJson(match),
-  ).length;
+  const changedOrAdded = nextMatches.flatMap((nextMatch) => {
+    const previousMatch = previousById.get(nextMatch.externalId);
+
+    if (!previousMatch) {
+      return [
+        {
+          matchLabel: formatMatchLabel(nextMatch),
+          details: ["new match"],
+        },
+      ];
+    }
+
+    const details = describeMatchChanges(previousMatch, nextMatch);
+    return details.length > 0
+      ? [
+          {
+            matchLabel: formatMatchLabel(nextMatch),
+            details,
+          },
+        ]
+      : [];
+  });
+
+  const removed = previousMatches.flatMap((previousMatch) =>
+    nextById.has(previousMatch.externalId)
+      ? []
+      : [
+          {
+            matchLabel: formatMatchLabel(previousMatch),
+            details: ["removed from provider payload"],
+          },
+        ],
+  );
+
+  return [...changedOrAdded, ...removed];
 }
 
-function stableMatchJson(match: NormalizedMatch): string {
-  return JSON.stringify({
-    externalId: match.externalId,
-    stage: match.stage,
-    homeTeam: match.homeTeam,
-    awayTeam: match.awayTeam,
-    homeScore: match.homeScore,
-    awayScore: match.awayScore,
-    status: match.status,
-    kickoffAt: match.kickoffAt,
-    winner: match.winner,
-  });
+function describeMatchChanges(
+  previousMatch: NormalizedMatch,
+  nextMatch: NormalizedMatch,
+): string[] {
+  const details: string[] = [];
+
+  if (previousMatch.status !== nextMatch.status) {
+    details.push(`status ${previousMatch.status} -> ${nextMatch.status}`);
+  }
+
+  if (
+    previousMatch.homeScore !== nextMatch.homeScore ||
+    previousMatch.awayScore !== nextMatch.awayScore
+  ) {
+    details.push(
+      `score ${formatScore(previousMatch)} -> ${formatScore(nextMatch)}`,
+    );
+  }
+
+  if (previousMatch.winner !== nextMatch.winner) {
+    details.push(
+      `winner ${previousMatch.winner ?? "-"} -> ${nextMatch.winner ?? "-"}`,
+    );
+  }
+
+  if (previousMatch.kickoffAt !== nextMatch.kickoffAt) {
+    details.push("kickoff time updated");
+  }
+
+  if (previousMatch.stage !== nextMatch.stage) {
+    details.push(`stage ${previousMatch.stage} -> ${nextMatch.stage}`);
+  }
+
+  if (
+    previousMatch.homeTeam !== nextMatch.homeTeam ||
+    previousMatch.awayTeam !== nextMatch.awayTeam
+  ) {
+    details.push(
+      `teams ${formatMatchLabel(previousMatch)} -> ${formatMatchLabel(nextMatch)}`,
+    );
+  }
+
+  return details;
+}
+
+function formatMatchLabel(match: NormalizedMatch): string {
+  return `${match.homeTeam} vs ${match.awayTeam}`;
+}
+
+function formatScore(match: NormalizedMatch): string {
+  return match.homeScore === null || match.awayScore === null
+    ? "-"
+    : `${match.homeScore}-${match.awayScore}`;
 }
 
 export async function runMonitorWithPayload(

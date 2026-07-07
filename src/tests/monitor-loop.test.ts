@@ -206,6 +206,50 @@ describe("runMonitorLoop", () => {
     expect(runs[0]?.errorMessage).toContain("assumed America/New_York");
   });
 
+  it("logs a readable summary of detected match changes", async () => {
+    const repository = new InMemoryTournamentRepository();
+
+    await runMonitorWithPayload(
+      makePayload([
+        {
+          id: "r16-1",
+          round: "round_of_16",
+          home: "Brazil",
+          away: "Norway",
+          status: "scheduled",
+          kickoffAt: "2026-07-05T16:00:00.000Z",
+          winner: null,
+        },
+      ]),
+      repository,
+    );
+
+    await runMonitorWithPayload(
+      makePayload([
+        {
+          id: "r16-1",
+          round: "round_of_16",
+          home: "Brazil",
+          away: "Norway",
+          homeScore: 2,
+          awayScore: 1,
+          status: "finished",
+          kickoffAt: "2026-07-05T16:00:00.000Z",
+          winner: "Brazil",
+        },
+      ]),
+      repository,
+    );
+
+    const runs = await repository.getAgentRuns();
+
+    expect(runs[0]?.changesDetected).toBe(1);
+    expect(runs[0]?.errorMessage).toContain("Brazil vs Norway");
+    expect(runs[0]?.errorMessage).toContain("status scheduled -> finished");
+    expect(runs[0]?.errorMessage).toContain("score - -> 2-1");
+    expect(runs[0]?.errorMessage).toContain("winner - -> Brazil");
+  });
+
   it("persists valid worldcup26 fixture data", async () => {
     const repository = new InMemoryTournamentRepository();
     const provider: TournamentDataProvider = {
