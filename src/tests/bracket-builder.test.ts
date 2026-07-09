@@ -155,6 +155,41 @@ describe("bracket builder", () => {
     });
   });
 
+  it("infers tied match winner from the next bracket slot when dependency labels are missing", () => {
+    const first = makeMatch({
+      externalId: "73",
+      homeTeam: "Portugal",
+      awayTeam: "Croatia",
+      homeScore: 2,
+      awayScore: 0,
+      winner: "Portugal",
+    });
+    const source = makeMatch({
+      externalId: "74",
+      homeTeam: "Germany",
+      awayTeam: "Paraguay",
+      homeScore: 1,
+      awayScore: 1,
+      winner: null,
+    });
+    const next = makeMatch({
+      externalId: "89",
+      stage: "round_of_16",
+      status: "scheduled",
+      homeTeam: "Portugal",
+      awayTeam: "Paraguay",
+      homeScore: null,
+      awayScore: null,
+      winner: null,
+    });
+
+    expect(resolveKnockoutOutcome(source, [first, source, next])).toMatchObject({
+      winner: "Paraguay",
+      winMethod: "inferred_from_next_round",
+      needsReview: false,
+    });
+  });
+
   it("shows user-friendly dependency labels for scheduled future matches", () => {
     const r16a = makeMatch({
       externalId: "89",

@@ -594,7 +594,43 @@ function inferWinnerFromNextRound(
     }
   }
 
+  const nextMatch = findNextProgressionMatch(match, allMatches);
+  if (nextMatch) {
+    for (const candidate of [nextMatch.homeTeam, nextMatch.awayTeam]) {
+      if (sameTeam(candidate, match.homeTeam)) {
+        return match.homeTeam;
+      }
+
+      if (sameTeam(candidate, match.awayTeam)) {
+        return match.awayTeam;
+      }
+    }
+  }
+
   return null;
+}
+
+function findNextProgressionMatch(
+  match: NormalizedMatch,
+  allMatches: NormalizedMatch[],
+): NormalizedMatch | null {
+  const nextStage = getNextStage(match.stage);
+
+  if (!nextStage) {
+    return null;
+  }
+
+  const currentStageMatches = orderMatchesForStage(match.stage, allMatches);
+  const nextStageMatches = orderMatchesForStage(nextStage, allMatches);
+  const currentIndex = currentStageMatches.findIndex((candidate) =>
+    sameMatchId(candidate.externalId, match.externalId),
+  );
+
+  if (currentIndex < 0) {
+    return null;
+  }
+
+  return nextStageMatches[Math.floor(currentIndex / 2)] ?? null;
 }
 
 function getSideDependency(
