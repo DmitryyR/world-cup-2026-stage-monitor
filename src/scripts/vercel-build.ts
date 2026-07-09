@@ -1,27 +1,19 @@
 import { spawnSync } from "node:child_process";
 
 const databaseUrl = firstEnvValue([
-  "DATABASE_URL",
-  "POSTGRES_PRISMA_URL",
-  "DATABASE_POSTGRES_URL",
-  "POSTGRES_URL",
+  "NEON2_DATABASE_URL",
 ]);
 
 const directUrl = firstEnvValue([
-  "DIRECT_URL",
-  "DATABASE_URL_UNPOOLED",
-  "DATABASE_POSTGRES_URL_NON_POOLING",
-  "POSTGRES_URL_NON_POOLING",
-  "DATABASE_POSTGRES_URL",
-  "POSTGRES_URL",
+  "NEON2_DATABASE_URL_UNPOOLED",
 ]);
 
 if (!databaseUrl) {
   console.error(
     [
       "Missing database URL for Vercel build.",
-      "Set DATABASE_URL to the runtime PostgreSQL connection string.",
-      "Checked: DATABASE_URL, POSTGRES_PRISMA_URL, DATABASE_POSTGRES_URL, POSTGRES_URL.",
+      "Set NEON2_DATABASE_URL to the runtime PostgreSQL connection string.",
+      "Checked: NEON2_DATABASE_URL.",
     ].join("\n"),
   );
   process.exit(1);
@@ -31,8 +23,8 @@ if (!directUrl) {
   console.error(
     [
       "Missing direct database URL for Prisma migrations.",
-      "Set DIRECT_URL to the direct/unpooled Neon PostgreSQL connection string.",
-      "Checked: DIRECT_URL, DATABASE_URL_UNPOOLED, DATABASE_POSTGRES_URL_NON_POOLING, POSTGRES_URL_NON_POOLING, DATABASE_POSTGRES_URL, POSTGRES_URL.",
+      "Set NEON2_DATABASE_URL_UNPOOLED to the direct/unpooled Neon PostgreSQL connection string.",
+      "Checked: NEON2_DATABASE_URL_UNPOOLED.",
     ].join("\n"),
   );
   process.exit(1);
@@ -40,8 +32,8 @@ if (!directUrl) {
 
 const env = {
   ...process.env,
-  DATABASE_URL: databaseUrl,
-  DIRECT_URL: directUrl,
+  NEON2_DATABASE_URL: databaseUrl,
+  NEON2_DATABASE_URL_UNPOOLED: directUrl,
 };
 
 run("prisma", ["generate"]);

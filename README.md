@@ -151,15 +151,15 @@ The production database is PostgreSQL. Local development should use the same Pos
 ## Environment Variables
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+NEON2_DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
+NEON2_DATABASE_URL_UNPOOLED="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
 DATA_PROVIDER="worldcup26"
 WORLDCUP26_BASE_URL="https://worldcup26.ir"
 API_REQUEST_TIMEOUT_MS="10000"
 ```
 
-- `DATABASE_URL`: runtime database URL used by the application.
-- `DIRECT_URL`: direct/unpooled database URL used by Prisma migrations.
+- `NEON2_DATABASE_URL`: runtime database URL used by the application.
+- `NEON2_DATABASE_URL_UNPOOLED`: direct/unpooled database URL used by Prisma migrations.
 - `DATA_PROVIDER`: `worldcup26` for real data, or `mock` for deterministic local demos.
 - `WORLDCUP26_BASE_URL`: community/open-source World Cup 2026 provider base URL.
 - `API_REQUEST_TIMEOUT_MS`: provider request timeout.
@@ -192,14 +192,14 @@ npm run vercel-build
 ### Required Vercel Variables
 
 ```env
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
+NEON2_DATABASE_URL="postgresql://..."
+NEON2_DATABASE_URL_UNPOOLED="postgresql://..."
 DATA_PROVIDER="worldcup26"
 WORLDCUP26_BASE_URL="https://worldcup26.ir"
 API_REQUEST_TIMEOUT_MS="10000"
 ```
 
-For Neon, `DIRECT_URL` should be the direct/unpooled/non-pooling connection string. This prevents Prisma migration timeout `P1002` during `prisma migrate deploy`.
+For Neon, `NEON2_DATABASE_URL_UNPOOLED` should be the direct/unpooled/non-pooling connection string. This prevents Prisma migration timeout `P1002` during `prisma migrate deploy`.
 
 After the first production deploy, open the site and click **Run Monitor** to fetch real provider data, validate it, persist accepted rows, and populate the dashboard.
 
