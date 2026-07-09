@@ -18,9 +18,9 @@ type MatchCardProps = {
 
 export function MatchCard({ match, contextMatches = [match] }: MatchCardProps) {
   const isFinished = match.status === "finished";
-  const status = getDisplayMatchStatus(match);
-  const reviewLabel = getMatchReviewLabel(match);
-  const outcomeLabel = getWinMethodLabel(match);
+  const status = getDisplayMatchStatus(match, { matches: contextMatches });
+  const reviewLabel = getMatchReviewLabel(match, { matches: contextMatches });
+  const outcomeLabel = getWinMethodLabel(match, contextMatches);
   const homeTeam = resolveTeamNameForDisplay(match.homeTeam, contextMatches);
   const awayTeam = resolveTeamNameForDisplay(match.awayTeam, contextMatches);
 

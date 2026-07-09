@@ -82,7 +82,7 @@ export function TeamPathCard({
       </div>
       <div className="mt-4 space-y-3 border-l border-slate-700 pl-4">
         {finished.slice(-4).map((match) => (
-          <TeamPathMatch key={match.externalId} match={match} />
+          <TeamPathMatch key={match.externalId} match={match} matches={matches} />
         ))}
         <div className="relative text-sm">
           <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full border border-slate-500 bg-slate-900" />
@@ -110,8 +110,14 @@ export function TeamPathCard({
   );
 }
 
-function TeamPathMatch({ match }: { match: NormalizedMatch }) {
-  const winMethodLabel = getWinMethodLabel(match);
+function TeamPathMatch({
+  match,
+  matches,
+}: {
+  match: NormalizedMatch;
+  matches: NormalizedMatch[];
+}) {
+  const winMethodLabel = getWinMethodLabel(match, matches);
 
   return (
     <div className="relative text-sm">

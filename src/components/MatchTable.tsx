@@ -34,12 +34,12 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
           </thead>
           <tbody className="divide-y divide-white/10">
             {matches.map((match) => {
-              const outcome = resolveKnockoutOutcome(match);
+              const outcome = resolveKnockoutOutcome(match, matches);
               const winner = outcome.winner ?? match.winner;
               const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
               const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
-              const reviewLabel = getMatchReviewLabel(match);
-              const resultMethod = getWinMethodLabel(match);
+              const reviewLabel = getMatchReviewLabel(match, { matches });
+              const resultMethod = getWinMethodLabel(match, matches);
 
               return (
                 <tr key={match.externalId} className="hover:bg-white/[0.03]">
@@ -60,7 +60,7 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                     {match.status === "scheduled" ? "-" : formatScore(match)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <StatusBadge status={getDisplayMatchStatus(match)} />
+                    <StatusBadge status={getDisplayMatchStatus(match, { matches })} />
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-300">
                     {winner ? (
@@ -95,12 +95,12 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
       </div>
       <div className="grid gap-3 p-3 md:hidden">
         {matches.map((match) => {
-          const outcome = resolveKnockoutOutcome(match);
+          const outcome = resolveKnockoutOutcome(match, matches);
           const winner = outcome.winner ?? match.winner;
           const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
           const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
-          const reviewLabel = getMatchReviewLabel(match);
-          const resultMethod = getWinMethodLabel(match);
+          const reviewLabel = getMatchReviewLabel(match, { matches });
+          const resultMethod = getWinMethodLabel(match, matches);
 
           return (
             <article
@@ -117,7 +117,7 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                     {formatStage(match.stage)}
                   </div>
                 </div>
-                <StatusBadge status={getDisplayMatchStatus(match)} />
+                <StatusBadge status={getDisplayMatchStatus(match, { matches })} />
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-3">
                 <div className="space-y-2">

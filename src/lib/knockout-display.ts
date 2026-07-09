@@ -10,15 +10,24 @@ import { getTeamDisplayName } from "@/lib/team-flags";
 
 export type DisplayMatchStatus = MatchStatus | "needs_review";
 
+type MatchDisplayOptions =
+  | Date
+  | {
+      now?: Date;
+      matches?: NormalizedMatch[];
+    };
+
 export function getDisplayMatchStatus(
   match: NormalizedMatch,
-  now = new Date(),
+  options: MatchDisplayOptions = {},
 ): DisplayMatchStatus {
+  const { now, matches } = normalizeDisplayOptions(options);
+
   if (isStaleScheduledMatch(match, now)) {
     return "needs_review";
   }
 
-  const outcome = resolveKnockoutOutcome(match);
+  const outcome = resolveKnockoutOutcome(match, matches ?? [match]);
 
   if (outcome.needsReview) {
     return "needs_review";
@@ -27,18 +36,26 @@ export function getDisplayMatchStatus(
   return match.status;
 }
 
-export function getMatchReviewLabel(match: NormalizedMatch, now = new Date()): string | null {
+export function getMatchReviewLabel(
+  match: NormalizedMatch,
+  options: MatchDisplayOptions = {},
+): string | null {
+  const { now, matches } = normalizeDisplayOptions(options);
+
   if (isStaleScheduledMatch(match, now)) {
     return "Scheduled time passed";
   }
 
-  const outcome = resolveKnockoutOutcome(match);
+  const outcome = resolveKnockoutOutcome(match, matches ?? [match]);
 
   return outcome.needsReview ? "Needs winner review" : null;
 }
 
-export function getWinMethodLabel(match: NormalizedMatch): string | null {
-  const outcome = resolveKnockoutOutcome(match);
+export function getWinMethodLabel(
+  match: NormalizedMatch,
+  matches: NormalizedMatch[] = [match],
+): string | null {
+  const outcome = resolveKnockoutOutcome(match, matches);
   const winner = outcome.winner ?? match.winner;
 
   if (match.status !== "finished" || !winner) {
@@ -58,6 +75,20 @@ export function getWinMethodLabel(match: NormalizedMatch): string | null {
     reviewReason: outcome.reviewReason,
     sourceDiagnostics: outcome.sourceDiagnostics,
   } satisfies BracketMatch);
+}
+
+function normalizeDisplayOptions(options: MatchDisplayOptions): {
+  now: Date;
+  matches?: NormalizedMatch[];
+} {
+  if (options instanceof Date) {
+    return { now: options };
+  }
+
+  return {
+    now: options.now ?? new Date(),
+    matches: options.matches,
+  };
 }
 
 export function resolveTeamNameForDisplay(

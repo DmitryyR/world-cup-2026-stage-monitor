@@ -23,7 +23,11 @@ export default async function HomePage() {
     repository.getAgentRuns(20),
   ]);
   const latestResults = matches
-    .filter((match) => match.status === "finished" && getDisplayMatchStatus(match) === "finished")
+    .filter(
+      (match) =>
+        match.status === "finished" &&
+        getDisplayMatchStatus(match, { matches }) === "finished",
+    )
     .sort((first, second) => second.kickoffAt.localeCompare(first.kickoffAt))
     .slice(0, 4);
   const now = new Date();
