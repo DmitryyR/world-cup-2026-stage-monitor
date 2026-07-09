@@ -1,4 +1,5 @@
 import type { NormalizedMatch, MatchStatus, TournamentStage } from "@/domain/types";
+import { isFutureScheduledMatch } from "./match-staleness";
 import { formatTeamName } from "./team-flags";
 
 export type TeamSummary = {
@@ -41,13 +42,16 @@ function toTeamSummary(team: string, matches: NormalizedMatch[]): TeamSummary {
     first.kickoffAt.localeCompare(second.kickoffAt),
   );
   const finishedMatches = orderedMatches.filter((match) => match.status === "finished");
+  const now = new Date();
   const nextMatch =
-    orderedMatches.find((match) => match.status === "live" || match.status === "scheduled") ??
+    orderedMatches.find(
+      (match) => match.status === "live" || isFutureScheduledMatch(match, now),
+    ) ??
     null;
   const lastMatch = finishedMatches.at(-1) ?? null;
   const latestReference = nextMatch ?? lastMatch;
   const live = orderedMatches.filter((match) => match.status === "live").length;
-  const scheduled = orderedMatches.filter((match) => match.status === "scheduled").length;
+  const scheduled = orderedMatches.filter((match) => isFutureScheduledMatch(match, now)).length;
 
   return {
     team,

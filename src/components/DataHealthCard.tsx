@@ -21,7 +21,9 @@ export function DataHealthCard({
   const displayStatus =
     checkerStatus === "failed"
       ? "failed"
-      : bracketValidation && bracketValidation.needsReviewMatches > 0
+      : bracketValidation &&
+          (bracketValidation.needsReviewMatches > 0 ||
+            bracketValidation.staleScheduledMatches > 0)
         ? "needs_review"
         : "passed";
   const syncedLabel = state
@@ -110,6 +112,12 @@ export function DataHealthCard({
               <dt className="text-slate-400">Stale live matches</dt>
               <dd className="font-semibold text-slate-100">
                 {bracketValidation.staleLiveMatches}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Stale scheduled matches</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.staleScheduledMatches}
               </dd>
             </div>
           </>

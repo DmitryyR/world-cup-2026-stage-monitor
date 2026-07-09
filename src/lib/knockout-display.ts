@@ -5,11 +5,19 @@ import {
   type BracketMatch,
 } from "@/domain/bracket-builder";
 import type { MatchStatus, NormalizedMatch } from "@/domain/types";
+import { isStaleScheduledMatch } from "@/lib/match-staleness";
 import { getTeamDisplayName } from "@/lib/team-flags";
 
 export type DisplayMatchStatus = MatchStatus | "needs_review";
 
-export function getDisplayMatchStatus(match: NormalizedMatch): DisplayMatchStatus {
+export function getDisplayMatchStatus(
+  match: NormalizedMatch,
+  now = new Date(),
+): DisplayMatchStatus {
+  if (isStaleScheduledMatch(match, now)) {
+    return "needs_review";
+  }
+
   const outcome = resolveKnockoutOutcome(match);
 
   if (outcome.needsReview) {
@@ -17,6 +25,16 @@ export function getDisplayMatchStatus(match: NormalizedMatch): DisplayMatchStatu
   }
 
   return match.status;
+}
+
+export function getMatchReviewLabel(match: NormalizedMatch, now = new Date()): string | null {
+  if (isStaleScheduledMatch(match, now)) {
+    return "Scheduled time passed";
+  }
+
+  const outcome = resolveKnockoutOutcome(match);
+
+  return outcome.needsReview ? "Needs winner review" : null;
 }
 
 export function getWinMethodLabel(match: NormalizedMatch): string | null {

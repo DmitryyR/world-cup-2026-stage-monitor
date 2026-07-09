@@ -2,7 +2,12 @@ import type { NormalizedMatch } from "@/domain/types";
 import { resolveKnockoutOutcome } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import { getDisplayMatchStatus, getWinMethodLabel } from "@/lib/knockout-display";
+import {
+  getDisplayMatchStatus,
+  getMatchReviewLabel,
+  getWinMethodLabel,
+  resolveTeamNameForDisplay,
+} from "@/lib/knockout-display";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
@@ -31,6 +36,9 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
             {matches.map((match) => {
               const outcome = resolveKnockoutOutcome(match);
               const winner = outcome.winner ?? match.winner;
+              const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
+              const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
+              const reviewLabel = getMatchReviewLabel(match);
               const resultMethod = getWinMethodLabel(match);
 
               return (
@@ -43,9 +51,9 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                   </td>
                   <td className="px-4 py-3">
                     <span className="flex min-w-64 items-center gap-3">
-                      <TeamName teamName={match.homeTeam} />
+                      <TeamName teamName={homeTeam} />
                       <span className="text-slate-500">vs</span>
-                      <TeamName teamName={match.awayTeam} />
+                      <TeamName teamName={awayTeam} />
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-center font-semibold text-slate-100">
@@ -66,6 +74,8 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                           </div>
                         ) : null}
                       </div>
+                    ) : reviewLabel ? (
+                      <span className="font-semibold text-amber-200">{reviewLabel}</span>
                     ) : (
                       <span className="text-slate-500">TBD</span>
                     )}
@@ -87,13 +97,14 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
         {matches.map((match) => {
           const outcome = resolveKnockoutOutcome(match);
           const winner = outcome.winner ?? match.winner;
+          const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
+          const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
+          const reviewLabel = getMatchReviewLabel(match);
           const resultMethod = getWinMethodLabel(match);
 
           return (
             <article
-              aria-label={`${getTeamDisplayName(match.homeTeam)} versus ${getTeamDisplayName(
-                match.awayTeam,
-              )}`}
+              aria-label={`${homeTeam} versus ${awayTeam}`}
               className="rounded-lg border border-white/10 bg-slate-900/75 p-3"
               key={match.externalId}
             >
@@ -110,8 +121,8 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-3">
                 <div className="space-y-2">
-                  <TeamName teamName={match.homeTeam} />
-                  <TeamName teamName={match.awayTeam} />
+                  <TeamName teamName={homeTeam} />
+                  <TeamName teamName={awayTeam} />
                 </div>
                 <div className="self-center rounded-md bg-white/10 px-3 py-1.5 text-center text-lg font-black text-slate-50">
                   {match.status === "scheduled" ? "-" : formatScore(match)}
@@ -125,6 +136,8 @@ export function MatchTable({ matches, emptyMessage = "No accepted matches yet." 
                       {getTeamDisplayName(winner)}
                     </span>
                   </>
+                ) : reviewLabel ? (
+                  <span className="font-semibold text-amber-200">{reviewLabel}</span>
                 ) : (
                   "Winner: TBD"
                 )}

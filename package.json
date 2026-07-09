@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "monitor": "tsx src/scripts/run-monitor.ts"
+    "monitor": "tsx src/scripts/run-monitor.ts",
+    "ux:loop": "tsx src/scripts/start-ux-review-loop.ts"
   },
   "keywords": [
     "world-cup",

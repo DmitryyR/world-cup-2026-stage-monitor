@@ -9,6 +9,7 @@ import { TopMetricCard } from "@/components/TopMetricCard";
 import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
+import { isFutureScheduledMatch } from "@/lib/match-staleness";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
 export const revalidate = 60;
@@ -24,8 +25,9 @@ export default async function HomePage() {
     .filter((match) => match.status === "finished")
     .sort((first, second) => second.kickoffAt.localeCompare(first.kickoffAt))
     .slice(0, 4);
+  const now = new Date();
   const upcomingMatches = matches
-    .filter((match) => match.status === "scheduled")
+    .filter((match) => isFutureScheduledMatch(match, now))
     .sort((first, second) => first.kickoffAt.localeCompare(second.kickoffAt))
     .slice(0, 4);
   const liveMatch = matches.find((match) => match.status === "live") ?? null;

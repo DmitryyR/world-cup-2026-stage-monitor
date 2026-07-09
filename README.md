@@ -122,6 +122,25 @@ Example invocation:
 Use $product-ux-roast-review to audit this web app: https://world-cup-2026-stage-monitor.vercel.app/
 ```
 
+### UX Improvement Loop
+
+Create a new review/improvement loop iteration:
+
+```bash
+npm run ux:loop
+```
+
+The command creates a new file in `docs/ux-review-loop/` and prints a Codex
+prompt that runs:
+
+1. product/UX review with `$product-ux-roast-review`;
+2. score extraction and average calculation;
+3. focused improvement tasks when the average score is below `8.5`;
+4. verification;
+5. iteration recording.
+
+See `docs/UX_REVIEW_LOOP.md` for the full workflow.
+
 ## Stack
 
 - Next.js App Router

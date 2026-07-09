@@ -233,6 +233,26 @@ describe("bracket builder", () => {
     expect(match.winner ?? match.needsReview).toBeTruthy();
   });
 
+  it("reports scheduled knockout matches whose kickoff time has passed", () => {
+    const model = buildBracketModel([
+      makeMatch({
+        externalId: "89",
+        stage: "round_of_16",
+        status: "scheduled",
+        homeScore: null,
+        awayScore: null,
+        kickoffAt: "2020-07-01T18:00:00.000Z",
+      }),
+    ]);
+
+    expect(model.validation.staleScheduledMatches).toBe(1);
+    expect(model.validation.needsReviewMatches).toBe(1);
+    expect(model.validation.affectedMatches[0]).toMatchObject({
+      externalId: "89",
+      reason: "Scheduled match kickoff time has passed without live or finished status",
+    });
+  });
+
   it("formats win method labels", () => {
     const model = buildBracketModel([
       makeMatch({

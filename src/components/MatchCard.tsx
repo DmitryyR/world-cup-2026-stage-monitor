@@ -2,7 +2,11 @@ import Link from "next/link";
 import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
-import { getDisplayMatchStatus, getWinMethodLabel } from "@/lib/knockout-display";
+import {
+  getDisplayMatchStatus,
+  getMatchReviewLabel,
+  getWinMethodLabel,
+} from "@/lib/knockout-display";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
@@ -13,6 +17,7 @@ type MatchCardProps = {
 export function MatchCard({ match }: MatchCardProps) {
   const isFinished = match.status === "finished";
   const status = getDisplayMatchStatus(match);
+  const reviewLabel = getMatchReviewLabel(match);
   const outcomeLabel = getWinMethodLabel(match);
 
   return (
@@ -38,10 +43,16 @@ export function MatchCard({ match }: MatchCardProps) {
       </div>
       <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs leading-snug text-slate-400">
         <span>{formatKyivDateTime(match.kickoffAt)} Kyiv time</span>
-        <span className={outcomeLabel ? "font-semibold text-emerald-300" : ""}>
-          {status === "needs_review"
-            ? "Needs winner review"
-            : outcomeLabel ?? formatStage(match.stage)}
+        <span
+          className={
+            reviewLabel
+              ? "font-semibold text-amber-200"
+              : outcomeLabel
+                ? "font-semibold text-emerald-300"
+                : ""
+          }
+        >
+          {reviewLabel ?? outcomeLabel ?? formatStage(match.stage)}
         </span>
       </div>
       <Link

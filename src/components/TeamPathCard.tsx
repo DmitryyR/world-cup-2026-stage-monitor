@@ -6,6 +6,7 @@ import type { NormalizedMatch } from "@/domain/types";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatScore, formatStage } from "@/lib/format";
 import { getWinMethodLabel } from "@/lib/knockout-display";
+import { isFutureScheduledMatch } from "@/lib/match-staleness";
 import { getTeamDisplayName } from "@/lib/team-flags";
 import { TeamName } from "./TeamName";
 
@@ -28,7 +29,11 @@ export function TeamPathCard({
     .filter((match) => match.homeTeam === selectedTeam || match.awayTeam === selectedTeam)
     .sort((first, second) => first.kickoffAt.localeCompare(second.kickoffAt));
   const finished = teamMatches.filter((match) => match.status === "finished");
-  const nextMatch = teamMatches.find((match) => match.status !== "finished") ?? null;
+  const now = new Date();
+  const nextMatch =
+    teamMatches.find(
+      (match) => match.status === "live" || isFutureScheduledMatch(match, now),
+    ) ?? null;
 
   function updateSelectedTeam(team: string) {
     if (onSelectedTeamChange) {

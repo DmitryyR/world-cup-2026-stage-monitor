@@ -1,4 +1,5 @@
 import type { MatchStatus, NormalizedMatch, TournamentStage } from "./types";
+import { isStaleScheduledMatch } from "@/lib/match-staleness";
 import { formatPlaceholderTeam, formatTeamName } from "@/lib/team-flags";
 
 export type WinMethod =
@@ -53,6 +54,7 @@ export type BracketValidation = {
   needsReviewMatches: number;
   placeholderDependencies: number;
   staleLiveMatches: number;
+  staleScheduledMatches: number;
   affectedMatches: Array<{
     externalId: string;
     reason: string;
@@ -613,15 +615,22 @@ function getSideDependency(
 
 function validateBracket(rounds: BracketRound[]): BracketValidation {
   const matches = rounds.flatMap((round) => round.matches);
-  const affectedMatches = matches
+  const reviewMatches = matches
     .filter((match) => match.needsReview)
     .map((match) => ({
       externalId: match.externalId,
       reason: match.reviewReason ?? "Needs review",
     }));
+  const staleScheduledMatches = matches
+    .filter((match) => isStaleScheduledMatch(match))
+    .map((match) => ({
+      externalId: match.externalId,
+      reason: "Scheduled match kickoff time has passed without live or finished status",
+    }));
+  const affectedMatches = [...reviewMatches, ...staleScheduledMatches];
 
   return {
-    unresolvedWinners: affectedMatches.length,
+    unresolvedWinners: reviewMatches.length,
     needsReviewMatches: affectedMatches.length,
     placeholderDependencies: matches.reduce(
       (count, match) =>
@@ -631,6 +640,7 @@ function validateBracket(rounds: BracketRound[]): BracketValidation {
       0,
     ),
     staleLiveMatches: matches.filter(isStaleLiveMatch).length,
+    staleScheduledMatches: staleScheduledMatches.length,
     affectedMatches,
   };
 }

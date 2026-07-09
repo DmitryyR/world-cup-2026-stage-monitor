@@ -6,6 +6,7 @@ import { TopMetricCard } from "@/components/TopMetricCard";
 import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
+import { isFutureScheduledMatch } from "@/lib/match-staleness";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
 export const revalidate = 300;
@@ -22,9 +23,10 @@ export default async function BracketPage() {
   const progressPercent =
     totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
   const liveMatch = matches.find((match) => match.status === "live") ?? null;
+  const now = new Date();
   const nextMatch =
     matches
-      .filter((match) => match.status === "scheduled")
+      .filter((match) => isFutureScheduledMatch(match, now))
       .sort((first, second) => first.kickoffAt.localeCompare(second.kickoffAt))[0] ??
     null;
   const latestAcceptedRun =
