@@ -6,19 +6,23 @@ import {
   getDisplayMatchStatus,
   getMatchReviewLabel,
   getWinMethodLabel,
+  resolveTeamNameForDisplay,
 } from "@/lib/knockout-display";
 import { StatusBadge } from "./StatusBadge";
 import { TeamName } from "./TeamName";
 
 type MatchCardProps = {
   match: NormalizedMatch;
+  contextMatches?: NormalizedMatch[];
 };
 
-export function MatchCard({ match }: MatchCardProps) {
+export function MatchCard({ match, contextMatches = [match] }: MatchCardProps) {
   const isFinished = match.status === "finished";
   const status = getDisplayMatchStatus(match);
   const reviewLabel = getMatchReviewLabel(match);
   const outcomeLabel = getWinMethodLabel(match);
+  const homeTeam = resolveTeamNameForDisplay(match.homeTeam, contextMatches);
+  const awayTeam = resolveTeamNameForDisplay(match.awayTeam, contextMatches);
 
   return (
     <article className="min-w-0 rounded-lg border border-white/10 bg-slate-900/75 p-4 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-blue-400/40">
@@ -29,7 +33,7 @@ export function MatchCard({ match }: MatchCardProps) {
         <StatusBadge status={status} />
       </div>
       <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
-        <TeamName teamName={match.homeTeam} />
+        <TeamName teamName={homeTeam} />
         <span
           className={
             isFinished
@@ -39,7 +43,7 @@ export function MatchCard({ match }: MatchCardProps) {
         >
           {isFinished ? formatScore(match) : "VS"}
         </span>
-        <TeamName align="right" teamName={match.awayTeam} />
+        <TeamName align="right" teamName={awayTeam} />
       </div>
       <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs leading-snug text-slate-400">
         <span>{formatKyivDateTime(match.kickoffAt)} Kyiv time</span>

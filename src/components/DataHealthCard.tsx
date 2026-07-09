@@ -31,6 +31,9 @@ export function DataHealthCard({
     : "Not run";
   const providerWarning =
     latestAcceptedRun?.status === "passed" ? latestAcceptedRun.errorMessage : null;
+  const providerWarningSummary = providerWarning
+    ? "Provider warning available in Agent Log"
+    : null;
 
   if (compact) {
     return (
@@ -45,9 +48,12 @@ export function DataHealthCard({
           <StatusBadge status={displayStatus} />
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-400">Synced {syncedLabel}</p>
-        {providerWarning ? (
-          <p className="mt-2 text-xs font-semibold leading-5 text-amber-200">
-            {providerWarning}
+        {providerWarningSummary ? (
+          <p
+            className="mt-2 text-xs font-semibold leading-5 text-amber-200"
+            title={providerWarning ?? undefined}
+          >
+            {providerWarningSummary}
           </p>
         ) : null}
         <Link

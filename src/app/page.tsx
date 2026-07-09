@@ -9,6 +9,7 @@ import { TopMetricCard } from "@/components/TopMetricCard";
 import { buildBracketModel } from "@/domain/bracket-builder";
 import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
+import { getDisplayMatchStatus, resolveTeamNameForDisplay } from "@/lib/knockout-display";
 import { isFutureScheduledMatch } from "@/lib/match-staleness";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
@@ -22,7 +23,7 @@ export default async function HomePage() {
     repository.getAgentRuns(20),
   ]);
   const latestResults = matches
-    .filter((match) => match.status === "finished")
+    .filter((match) => match.status === "finished" && getDisplayMatchStatus(match) === "finished")
     .sort((first, second) => second.kickoffAt.localeCompare(first.kickoffAt))
     .slice(0, 4);
   const now = new Date();
@@ -72,13 +73,13 @@ export default async function HomePage() {
           accent={liveMatch ? "red" : "blue"}
           detail={liveMatch ? <LiveMatchDetail match={liveMatch} /> : "No live match accepted"}
           label="Live Now"
-          value={liveMatch ? <TeamLine match={liveMatch} /> : "Idle"}
+          value={liveMatch ? <TeamLine match={liveMatch} matches={matches} /> : "Idle"}
         />
         <TopMetricCard
           accent="blue"
           detail={nextMatch ? `${formatKyivDateTime(nextMatch.kickoffAt)} Kyiv time` : "No scheduled match"}
           label="Next Match"
-          value={nextMatch ? <TeamLine match={nextMatch} /> : "-"}
+          value={nextMatch ? <TeamLine match={nextMatch} matches={matches} /> : "-"}
         />
         <DataHealthCard
           bracketValidation={bracket.validation}
@@ -107,7 +108,7 @@ export default async function HomePage() {
         >
           <div className="grid gap-3">
             {latestResults.map((match) => (
-              <MatchCard key={match.externalId} match={match} />
+              <MatchCard contextMatches={matches} key={match.externalId} match={match} />
             ))}
           </div>
         </DashboardSection>
@@ -119,7 +120,7 @@ export default async function HomePage() {
         >
           <div className="grid gap-3">
             {upcomingMatches.map((match) => (
-              <MatchCard key={match.externalId} match={match} />
+              <MatchCard contextMatches={matches} key={match.externalId} match={match} />
             ))}
           </div>
         </DashboardSection>
@@ -180,14 +181,19 @@ function DashboardSection({
 
 function TeamLine({
   match,
+  matches,
 }: {
   match: { homeTeam: string; awayTeam: string };
+  matches: Parameters<typeof resolveTeamNameForDisplay>[1];
 }) {
+  const homeTeam = resolveTeamNameForDisplay(match.homeTeam, matches);
+  const awayTeam = resolveTeamNameForDisplay(match.awayTeam, matches);
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <TeamName teamName={match.homeTeam} />
+      <TeamName teamName={homeTeam} />
       <span className="text-slate-500">vs</span>
-      <TeamName teamName={match.awayTeam} />
+      <TeamName teamName={awayTeam} />
     </div>
   );
 }
