@@ -15,7 +15,7 @@ export type AgentRunInput = Omit<AgentRunRecord, "id">;
 export type TournamentRepository = {
   getLatestState(): Promise<TournamentState | null>;
   getMatches(): Promise<NormalizedMatch[]>;
-  getAgentRuns(): Promise<AgentRunRecord[]>;
+  getAgentRuns(limit?: number): Promise<AgentRunRecord[]>;
   publishSnapshot(input: PublishSnapshotInput): Promise<void>;
   logAgentRun(input: AgentRunInput): Promise<AgentRunRecord>;
 };

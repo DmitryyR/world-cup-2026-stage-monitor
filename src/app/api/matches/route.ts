@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
+export const revalidate = 300;
+
 export async function GET() {
   const repository = new PrismaTournamentRepository();
   const matches = await repository.getMatches();

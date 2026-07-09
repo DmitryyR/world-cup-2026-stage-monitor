@@ -1,7 +1,7 @@
 import { MatchFiltersTable } from "@/components/MatchFiltersTable";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function MatchesPage() {
   const repository = new PrismaTournamentRepository();

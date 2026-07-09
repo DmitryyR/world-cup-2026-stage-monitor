@@ -8,67 +8,118 @@ import type {
 import { prisma } from "./db";
 import type { AgentRunInput, PublishSnapshotInput, TournamentRepository } from "./repository";
 
+const DEFAULT_AGENT_RUN_LIMIT = 50;
+
 export class PrismaTournamentRepository implements TournamentRepository {
   async getLatestState(): Promise<TournamentState | null> {
-    const state = await prisma.tournamentState.findFirst({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    try {
+      const state = await prisma.tournamentState.findFirst({
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          currentStage: true,
+          completedMatches: true,
+          remainingMatches: true,
+          champion: true,
+          lastCheckedAt: true,
+          checkerStatus: true,
+        },
+      });
 
-    if (!state) {
+      if (!state) {
+        logDbRead("getLatestState", 0);
+        return null;
+      }
+
+      logDbRead("getLatestState", 1);
+      return {
+        currentStage: state.currentStage as TournamentStage,
+        completedMatches: state.completedMatches,
+        remainingMatches: state.remainingMatches,
+        champion: state.champion,
+        lastCheckedAt: state.lastCheckedAt.toISOString(),
+        checkerStatus: state.checkerStatus as CheckerStatus,
+      };
+    } catch (error) {
+      logDbFailure("getLatestState", error);
       return null;
     }
-
-    return {
-      currentStage: state.currentStage as TournamentStage,
-      completedMatches: state.completedMatches,
-      remainingMatches: state.remainingMatches,
-      champion: state.champion,
-      lastCheckedAt: state.lastCheckedAt.toISOString(),
-      checkerStatus: state.checkerStatus as CheckerStatus,
-    };
   }
 
   async getMatches(): Promise<NormalizedMatch[]> {
-    const matches = await prisma.match.findMany({
-      orderBy: {
-        kickoffAt: "asc",
-      },
-    });
+    try {
+      const matches = await prisma.match.findMany({
+        orderBy: {
+          kickoffAt: "asc",
+        },
+        select: {
+          externalId: true,
+          stage: true,
+          homeTeam: true,
+          awayTeam: true,
+          homeScore: true,
+          awayScore: true,
+          status: true,
+          kickoffAt: true,
+          winner: true,
+        },
+      });
 
-    return matches.map((match) => ({
-      externalId: match.externalId,
-      stage: match.stage as TournamentStage,
-      homeTeam: match.homeTeam,
-      awayTeam: match.awayTeam,
-      homeScore: match.homeScore,
-      awayScore: match.awayScore,
-      status: match.status as NormalizedMatch["status"],
-      kickoffAt: match.kickoffAt.toISOString(),
-      winner: match.winner,
-      rawPayload: extractRawProviderMatch(match.rawPayload, match.externalId),
-    }));
+      logDbRead("getMatches", matches.length);
+      return matches.map((match) => ({
+        externalId: match.externalId,
+        stage: match.stage as TournamentStage,
+        homeTeam: match.homeTeam,
+        awayTeam: match.awayTeam,
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+        status: match.status as NormalizedMatch["status"],
+        kickoffAt: match.kickoffAt.toISOString(),
+        winner: match.winner,
+      }));
+    } catch (error) {
+      logDbFailure("getMatches", error);
+      return [];
+    }
   }
 
-  async getAgentRuns(): Promise<AgentRunRecord[]> {
-    const runs = await prisma.agentRun.findMany({
-      orderBy: {
-        startedAt: "desc",
-      },
-    });
+  async getAgentRuns(limit = DEFAULT_AGENT_RUN_LIMIT): Promise<AgentRunRecord[]> {
+    try {
+      const runs = await prisma.agentRun.findMany({
+        orderBy: {
+          startedAt: "desc",
+        },
+        take: limit,
+        select: {
+          id: true,
+          source: true,
+          status: true,
+          startedAt: true,
+          finishedAt: true,
+          changesDetected: true,
+          checkerResult: true,
+          detectedStage: true,
+          errorMessage: true,
+        },
+      });
 
-    return runs.map((run) => ({
-      id: run.id,
-      source: run.source,
-      status: run.status as CheckerStatus,
-      startedAt: run.startedAt.toISOString(),
-      finishedAt: run.finishedAt?.toISOString() ?? null,
-      changesDetected: run.changesDetected,
-      checkerResult: run.checkerResult as CheckerStatus,
-      detectedStage: (run.detectedStage as TournamentStage | null) ?? null,
-      errorMessage: run.errorMessage,
-    }));
+      logDbRead("getAgentRuns", runs.length);
+      return runs.map((run) => ({
+        id: run.id,
+        source: run.source,
+        status: run.status as CheckerStatus,
+        startedAt: run.startedAt.toISOString(),
+        finishedAt: run.finishedAt?.toISOString() ?? null,
+        changesDetected: run.changesDetected,
+        checkerResult: run.checkerResult as CheckerStatus,
+        detectedStage: (run.detectedStage as TournamentStage | null) ?? null,
+        errorMessage: run.errorMessage,
+      }));
+    } catch (error) {
+      logDbFailure("getAgentRuns", error);
+      return [];
+    }
   }
 
   async publishSnapshot(input: PublishSnapshotInput): Promise<void> {
@@ -86,10 +137,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
             status: match.status,
             kickoffAt: new Date(match.kickoffAt),
             winner: match.winner,
-            rawPayload:
-              input.rawPayload === undefined
-                ? null
-                : JSON.stringify(input.rawPayload),
+            rawPayload: match.rawPayload === undefined ? null : JSON.stringify(match.rawPayload),
           },
         }),
       ),
@@ -118,6 +166,17 @@ export class PrismaTournamentRepository implements TournamentRepository {
         detectedStage: input.detectedStage,
         errorMessage: input.errorMessage,
       },
+      select: {
+        id: true,
+        source: true,
+        status: true,
+        startedAt: true,
+        finishedAt: true,
+        changesDetected: true,
+        checkerResult: true,
+        detectedStage: true,
+        errorMessage: true,
+      },
     });
 
     return {
@@ -134,43 +193,15 @@ export class PrismaTournamentRepository implements TournamentRepository {
   }
 }
 
-function extractRawProviderMatch(rawPayload: string | null, externalId: string): unknown {
-  if (!rawPayload) {
-    return undefined;
-  }
-
-  try {
-    const parsed = JSON.parse(rawPayload) as unknown;
-
-    if (!isRecord(parsed)) {
-      return undefined;
-    }
-
-    const rawProviderPayload = parsed.rawProviderPayload;
-    const response =
-      isRecord(rawProviderPayload) && isRecord(rawProviderPayload.response)
-        ? rawProviderPayload.response
-        : undefined;
-    const rawGames = isRecord(response) && Array.isArray(response.games) ? response.games : [];
-    const rawGame = rawGames.find(
-      (game) =>
-        isRecord(game) &&
-        (String(game.id ?? "") === externalId || String(game._id ?? "") === externalId),
-    );
-
-    if (rawGame) {
-      return rawGame;
-    }
-
-    const normalizedMatches = Array.isArray(parsed.matches) ? parsed.matches : [];
-    return normalizedMatches.find(
-      (rawMatch) => isRecord(rawMatch) && String(rawMatch.id ?? "") === externalId,
-    );
-  } catch {
-    return undefined;
+function logDbRead(method: string, rows: number): void {
+  if (process.env.NODE_ENV !== "production") {
+    console.info(`[db] ${method}: ${rows} rows`);
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+function logDbFailure(method: string, error: unknown): void {
+  if (process.env.NODE_ENV !== "production") {
+    const message = error instanceof Error ? error.message : "unknown database error";
+    console.warn(`[db] ${method} failed: ${message}`);
+  }
 }

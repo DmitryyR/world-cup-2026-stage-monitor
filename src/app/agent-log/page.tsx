@@ -3,12 +3,12 @@ import { MonitorRunButton } from "@/components/MonitorRunButton";
 import { buildBracketModel } from "@/domain/bracket-builder";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function AgentLogPage() {
   const repository = new PrismaTournamentRepository();
   const [runs, matches] = await Promise.all([
-    repository.getAgentRuns(),
+    repository.getAgentRuns(50),
     repository.getMatches(),
   ]);
   const bracket = buildBracketModel(matches);

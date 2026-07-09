@@ -22,6 +22,10 @@ model Match {
   rawPayload String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([kickoffAt])
+  @@index([stage])
+  @@index([status])
 }
 
 model TournamentState {
@@ -33,6 +37,9 @@ model TournamentState {
   lastCheckedAt    DateTime
   checkerStatus    String
   createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([lastCheckedAt])
 }
 
 model AgentRun {
@@ -45,4 +52,7 @@ model AgentRun {
   checkerResult   String
   detectedStage   String?
   errorMessage    String?
+
+  @@index([startedAt])
+  @@index([status])
 }

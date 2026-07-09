@@ -11,14 +11,14 @@ import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
   const repository = new PrismaTournamentRepository();
   const [state, matches, runs] = await Promise.all([
     repository.getLatestState(),
     repository.getMatches(),
-    repository.getAgentRuns(),
+    repository.getAgentRuns(20),
   ]);
   const latestResults = matches
     .filter((match) => match.status === "finished")

@@ -8,14 +8,14 @@ import { formatKyivDateTime } from "@/lib/date-format";
 import { formatStage } from "@/lib/format";
 import { PrismaTournamentRepository } from "@/lib/prisma-repository";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function BracketPage() {
   const repository = new PrismaTournamentRepository();
   const [matches, state, runs] = await Promise.all([
     repository.getMatches(),
     repository.getLatestState(),
-    repository.getAgentRuns(),
+    repository.getAgentRuns(20),
   ]);
   const totalMatches = matches.length;
   const completedMatches = state?.completedMatches ?? 0;

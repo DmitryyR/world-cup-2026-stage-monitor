@@ -24,8 +24,9 @@ export class InMemoryTournamentRepository implements TournamentRepository {
     return [...this.matches];
   }
 
-  async getAgentRuns(): Promise<AgentRunRecord[]> {
-    return [...this.runs].reverse();
+  async getAgentRuns(limit?: number): Promise<AgentRunRecord[]> {
+    const runs = [...this.runs].reverse();
+    return limit === undefined ? runs : runs.slice(0, limit);
   }
 
   async publishSnapshot(input: PublishSnapshotInput): Promise<void> {
