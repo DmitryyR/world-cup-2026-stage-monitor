@@ -2,6 +2,11 @@ import { z } from "zod";
 
 export const matchStatusSchema = z.enum(["scheduled", "live", "finished"]);
 
+export const penaltyScoreSchema = z.object({
+  home: z.number().int().min(0),
+  away: z.number().int().min(0),
+});
+
 export const tournamentStageSchema = z.enum([
   "group_stage",
   "round_of_32",
@@ -23,6 +28,7 @@ export const normalizedMatchSchema = z.object({
   status: matchStatusSchema,
   kickoffAt: z.string().datetime(),
   winner: z.string().min(1).nullable(),
+  penaltyScore: penaltyScoreSchema.nullable().optional(),
   rawPayload: z.unknown().optional(),
 });
 
@@ -47,6 +53,7 @@ export const rawProviderMatchSchema = z.object({
   status: matchStatusSchema,
   kickoffAt: z.string().datetime(),
   winner: z.string().min(1).nullable().optional(),
+  penaltyScore: penaltyScoreSchema.nullable().optional(),
 });
 
 export const providerDiagnosticSchema = z.object({

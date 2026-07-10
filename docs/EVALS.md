@@ -41,6 +41,8 @@ npm run build
 | E22 | Future placeholder participants | UI shows `Winner of Team A vs Team B` or `TBD`, never raw provider tokens. |
 | E23 | Bracket coordinate layout | Left/right halves feed into center Final; semifinal losers feed Bronze Final. |
 | E24 | WorldCup26 timezone-less kickoff | Mapper assumes the documented source timezone, stores UTC, displays Europe/Kyiv time, and logs a provider warning. |
+| E25 | Penalty shootout score pipeline | Provider penalty fields are preserved through normalization/persistence and displayed as `1 (3 pens) - 1 (4 pens)`. |
+| E26 | Missing tied-knockout decision method | Data Health warns when a finished tied knockout has a winner but no penalties, extra-time, walkover, or explicit method. |
 
 ## Business Rules Checked
 
@@ -54,6 +56,8 @@ npm run build
 - Current stage cannot regress from persisted accepted state.
 - Final finished with winner means tournament is completed.
 - Full future schedules must not advance current stage past the earliest unresolved stage.
+- Finished tied knockout matches need a clear decision method: penalties, extra time, walkover, or a Data Health warning.
+- Penalty shootout scores must remain distinct from regular score.
 
 ## Provider / Checker Expectations
 
@@ -65,12 +69,14 @@ npm run build
 - Failed runs do not publish matches or tournament state.
 - Real-provider tests should use fixtures or mocked fetch, not live network calls.
 - Provider kickoff times without explicit offsets must be converted through a named source timezone and surfaced as warnings.
+- Provider penalty evidence must not be dropped during mapping, normalization, persistence, or repository reads.
 
 ## UI / Product Quality Checks
 
 - Summary explains current tournament state quickly.
 - Matches page supports filters, search, and empty states.
 - Bracket uses readable labels, status badges, scores, and win methods.
+- Penalty shootout results show the regular score plus penalty score, for example `1 (3 pens) - 1 (4 pens)`.
 - Teams page allows selecting a team path.
 - Agent Log keeps successful and failed monitor runs visible.
 - Data Health is compact in product views and detailed in admin context.

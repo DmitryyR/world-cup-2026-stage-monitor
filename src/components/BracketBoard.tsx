@@ -334,6 +334,7 @@ function BracketMatchCard({ match, label }: { match: BracketMatch; label: string
       </div>
       <div className="mt-2 min-h-0 flex-1 space-y-1.5">
         <TeamRow
+          penaltyScore={match.homePenaltyScore}
           score={match.homeScore}
           teamName={match.homeParticipant.label}
           muted={
@@ -345,6 +346,7 @@ function BracketMatchCard({ match, label }: { match: BracketMatch; label: string
           }
         />
         <TeamRow
+          penaltyScore={match.awayPenaltyScore}
           score={match.awayScore}
           teamName={match.awayParticipant.label}
           muted={
@@ -375,11 +377,13 @@ function BracketMatchCard({ match, label }: { match: BracketMatch; label: string
 function TeamRow({
   teamName,
   score,
+  penaltyScore,
   muted,
   winner,
 }: {
   teamName: string;
   score: number | null;
+  penaltyScore: number | null;
   muted: boolean;
   winner: boolean;
 }) {
@@ -392,6 +396,11 @@ function TeamRow({
         }`}
       >
         {score ?? ""}
+        {penaltyScore !== null ? (
+          <span className="ml-1 text-[10px] font-bold text-slate-400">
+            ({penaltyScore}p)
+          </span>
+        ) : null}
       </span>
     </div>
   );

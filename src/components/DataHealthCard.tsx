@@ -126,6 +126,12 @@ export function DataHealthCard({
                 {bracketValidation.staleScheduledMatches}
               </dd>
             </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-400">Missing decision method</dt>
+              <dd className="font-semibold text-slate-100">
+                {bracketValidation.missingDecisionMethods}
+              </dd>
+            </div>
           </>
         ) : null}
       </dl>

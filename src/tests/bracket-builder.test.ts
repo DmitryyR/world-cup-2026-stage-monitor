@@ -75,6 +75,29 @@ describe("bracket builder", () => {
     });
   });
 
+  it("resolves tied finished match from normalized penalty score", () => {
+    const match = makeMatch({
+      homeTeam: "Netherlands",
+      awayTeam: "Morocco",
+      homeScore: 1,
+      awayScore: 1,
+      penaltyScore: {
+        home: 2,
+        away: 3,
+      },
+    });
+
+    expect(resolveKnockoutOutcome(match)).toMatchObject({
+      winner: "Morocco",
+      winMethod: "penalties",
+      penaltyScore: {
+        home: 2,
+        away: 3,
+      },
+      needsReview: false,
+    });
+  });
+
   it("resolves tied finished match from provider side winner flags", () => {
     const match = makeMatch({
       homeTeam: "Switzerland",
@@ -323,6 +346,26 @@ describe("bracket builder", () => {
     expect(model.validation.affectedMatches[0]).toMatchObject({
       externalId: "89",
       reason: "Scheduled match kickoff time has passed without live or finished status",
+    });
+  });
+
+  it("reports tied knockout winners that have no penalty or decision method", () => {
+    const model = buildBracketModel([
+      makeMatch({
+        externalId: "74",
+        homeTeam: "Germany",
+        awayTeam: "Paraguay",
+        homeScore: 1,
+        awayScore: 1,
+        winner: "Paraguay",
+      }),
+    ]);
+
+    expect(model.validation.missingDecisionMethods).toBe(1);
+    expect(model.validation.affectedMatches[0]).toMatchObject({
+      externalId: "74",
+      reason:
+        "Germany vs Paraguay ended 1-1 and Paraguay is winner, but no penalty or decision method is available",
     });
   });
 

@@ -25,5 +25,13 @@ export function formatScore(match: NormalizedMatch): string {
     return "-";
   }
 
+  if (
+    match.status === "finished" &&
+    match.penaltyScore &&
+    match.penaltyScore.home !== match.penaltyScore.away
+  ) {
+    return `${match.homeScore} (${match.penaltyScore.home} pens) - ${match.awayScore} (${match.penaltyScore.away} pens)`;
+  }
+
   return `${match.homeScore} - ${match.awayScore}`;
 }

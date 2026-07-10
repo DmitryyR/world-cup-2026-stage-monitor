@@ -136,6 +136,10 @@ function RunDetails({
               label="Stale live matches"
               value={String(bracketValidation.staleLiveMatches)}
             />
+            <RunRow
+              label="Missing decision method"
+              value={String(bracketValidation.missingDecisionMethods)}
+            />
           </dl>
           {bracketValidation.affectedMatches.length > 0 ? (
             <ul className="mt-3 space-y-1 text-xs text-amber-200">

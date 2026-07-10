@@ -4,6 +4,7 @@ import type {
   RawProviderPayload,
   TournamentStage,
 } from "@/domain/types";
+import { extractPenaltyScore } from "@/domain/penalty-score";
 import { parseWorldCup26LocalDateToUtc } from "@/lib/date-time";
 import type { WorldCup26Game, WorldCup26Response } from "./worldcup26.schemas";
 
@@ -62,6 +63,7 @@ function mapWorldCup26GameWithDiagnostics(game: WorldCup26Game): {
   const status = mapWorldCup26Status(game);
   const homeScore = parseOptionalScore(game.home_score);
   const awayScore = parseOptionalScore(game.away_score);
+  const penaltyScore = extractPenaltyScore(game);
   const homeTeam = getTeamName(game.home_team_name_en, game.home_team_label, "TBD Home");
   const awayTeam = getTeamName(game.away_team_name_en, game.away_team_label, "TBD Away");
   const hasBothScores = homeScore !== null && awayScore !== null;
@@ -91,8 +93,9 @@ function mapWorldCup26GameWithDiagnostics(game: WorldCup26Game): {
       kickoffAt: parsedKickoff.utcInstant,
       winner:
         safeStatus === "finished" && hasBothScores
-          ? getWinner(homeTeam, awayTeam, homeScore, awayScore)
+          ? getWinner(homeTeam, awayTeam, homeScore, awayScore, penaltyScore)
           : null,
+      penaltyScore,
     },
     diagnostics,
   };
@@ -260,6 +263,7 @@ function getWinner(
   awayTeam: string,
   homeScore: number,
   awayScore: number,
+  penaltyScore?: { home: number; away: number } | null,
 ): string | null {
   if (homeScore > awayScore) {
     return homeTeam;
@@ -267,6 +271,10 @@ function getWinner(
 
   if (awayScore > homeScore) {
     return awayTeam;
+  }
+
+  if (penaltyScore && penaltyScore.home !== penaltyScore.away) {
+    return penaltyScore.home > penaltyScore.away ? homeTeam : awayTeam;
   }
 
   return null;

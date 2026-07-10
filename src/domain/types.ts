@@ -10,6 +10,11 @@ export type TournamentStage =
   | "final"
   | "completed";
 
+export type PenaltyScore = {
+  home: number;
+  away: number;
+};
+
 export type NormalizedMatch = {
   externalId: string;
   stage: TournamentStage;
@@ -20,6 +25,7 @@ export type NormalizedMatch = {
   status: MatchStatus;
   kickoffAt: string;
   winner: string | null;
+  penaltyScore?: PenaltyScore | null;
   rawPayload?: unknown;
 };
 
@@ -61,6 +67,7 @@ export type RawProviderMatch = {
   status: MatchStatus;
   kickoffAt: string;
   winner?: string | null;
+  penaltyScore?: PenaltyScore | null;
 };
 
 export type RawProviderPayload = {

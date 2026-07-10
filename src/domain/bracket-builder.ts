@@ -1,4 +1,5 @@
 import type { MatchStatus, NormalizedMatch, TournamentStage } from "./types";
+import { extractPenaltyScore } from "./penalty-score";
 import { isStaleScheduledMatch } from "@/lib/match-staleness";
 import { formatPlaceholderTeam, formatTeamName } from "@/lib/team-flags";
 
@@ -55,6 +56,7 @@ export type BracketValidation = {
   placeholderDependencies: number;
   staleLiveMatches: number;
   staleScheduledMatches: number;
+  missingDecisionMethods: number;
   affectedMatches: Array<{
     externalId: string;
     reason: string;
@@ -493,22 +495,9 @@ function resolvePenaltyWinner(
   match: NormalizedMatch,
   rawMatch: Record<string, unknown> | null,
 ): { winner: string; homePenaltyScore: number; awayPenaltyScore: number } | null {
-  const homePenaltyScore = parseFirstOptionalNumber(rawMatch, [
-    "home_penalty_score",
-    "home_penalties",
-    "home_penalty",
-    "home_penalty_goals",
-    "home_score_penalties",
-    "home_team_penalties",
-  ]);
-  const awayPenaltyScore = parseFirstOptionalNumber(rawMatch, [
-    "away_penalty_score",
-    "away_penalties",
-    "away_penalty",
-    "away_penalty_goals",
-    "away_score_penalties",
-    "away_team_penalties",
-  ]);
+  const penaltyScore = match.penaltyScore ?? extractPenaltyScore(rawMatch);
+  const homePenaltyScore = penaltyScore?.home ?? null;
+  const awayPenaltyScore = penaltyScore?.away ?? null;
 
   if (homePenaltyScore === null || awayPenaltyScore === null || homePenaltyScore === awayPenaltyScore) {
     return null;
@@ -714,7 +703,20 @@ function validateBracket(rounds: BracketRound[]): BracketValidation {
       externalId: match.externalId,
       reason: "Scheduled match kickoff time has passed without live or finished status",
     }));
-  const affectedMatches = [...reviewMatches, ...staleScheduledMatches];
+  const missingDecisionMethodMatches = matches
+    .filter(hasMissingTiedKnockoutDecisionMethod)
+    .map((match) => ({
+      externalId: match.externalId,
+      reason:
+        `${formatTeamName(match.homeTeam)} vs ${formatTeamName(match.awayTeam)} ended ` +
+        `${match.homeScore}-${match.awayScore} and ${formatTeamName(match.winner)} is winner, ` +
+        "but no penalty or decision method is available",
+    }));
+  const affectedMatches = [
+    ...reviewMatches,
+    ...staleScheduledMatches,
+    ...missingDecisionMethodMatches,
+  ];
 
   return {
     unresolvedWinners: reviewMatches.length,
@@ -728,8 +730,23 @@ function validateBracket(rounds: BracketRound[]): BracketValidation {
     ),
     staleLiveMatches: matches.filter(isStaleLiveMatch).length,
     staleScheduledMatches: staleScheduledMatches.length,
+    missingDecisionMethods: missingDecisionMethodMatches.length,
     affectedMatches,
   };
+}
+
+function hasMissingTiedKnockoutDecisionMethod(match: BracketMatch): boolean {
+  return (
+    match.status === "finished" &&
+    isKnockoutStage(match.stage) &&
+    match.homeScore !== null &&
+    match.awayScore !== null &&
+    match.homeScore === match.awayScore &&
+    Boolean(match.winner) &&
+    match.winMethod !== "penalties" &&
+    match.winMethod !== "extra_time" &&
+    match.winMethod !== "walkover"
+  );
 }
 
 function isStaleLiveMatch(match: BracketMatch): boolean {
@@ -828,24 +845,6 @@ function compareByMatchNumberThenKickoff(
   }
 
   return first.kickoffAt.localeCompare(second.kickoffAt);
-}
-
-function parseOptionalNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === "" || value === "null") {
-    return null;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function parseFirstOptionalNumber(
-  value: Record<string, unknown> | null,
-  keys: string[],
-): number | null {
-  const rawValue = firstDefined(value, keys);
-
-  return parseOptionalNumber(rawValue);
 }
 
 function firstDefined(

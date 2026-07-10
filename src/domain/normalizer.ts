@@ -1,4 +1,5 @@
 import { rawProviderPayloadSchema, normalizedMatchesSchema } from "./schemas";
+import { extractPenaltyScore } from "./penalty-score";
 import type { NormalizedMatch, RawProviderPayload, TournamentStage } from "./types";
 
 const roundToStage: Record<string, TournamentStage> = {
@@ -32,6 +33,8 @@ export function normalizeProviderPayload(
       throw new Error(`Unsupported match round: ${match.round}`);
     }
 
+    const penaltyScore = match.penaltyScore ?? extractPenaltyScore(sourceMatch);
+
     return {
       externalId: match.id,
       stage,
@@ -42,6 +45,7 @@ export function normalizeProviderPayload(
       status: match.status,
       kickoffAt: match.kickoffAt,
       winner: match.winner ?? null,
+      penaltyScore,
       ...(sourceMatch ? { rawPayload: sourceMatch } : {}),
     } satisfies NormalizedMatch;
   });

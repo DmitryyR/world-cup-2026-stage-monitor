@@ -113,6 +113,71 @@ describe("worldcup26 mapper", () => {
       home_penalties: "3",
       away_penalties: "5",
     });
+    expect(match?.penaltyScore).toEqual({ home: 3, away: 5 });
+  });
+
+  it("maps known penalty shootout fixtures when provider penalty data is available", () => {
+    const payload = mapWorldCup26ResponseToRawProviderPayload({
+      games: [
+        makeWorldCup26Game({
+          id: "74",
+          type: "r32",
+          home_team_name_en: "Germany",
+          away_team_name_en: "Paraguay",
+          home_score: "1",
+          away_score: "1",
+          finished: "TRUE",
+          time_elapsed: "finished",
+          home_penalties: "3",
+          away_penalties: "4",
+        }),
+        makeWorldCup26Game({
+          id: "75",
+          type: "r32",
+          home_team_name_en: "Netherlands",
+          away_team_name_en: "Morocco",
+          home_score: "1",
+          away_score: "1",
+          finished: "TRUE",
+          time_elapsed: "finished",
+          home_penalties: "2",
+          away_penalties: "3",
+        }),
+        makeWorldCup26Game({
+          id: "88",
+          type: "r32",
+          home_team_name_en: "Australia",
+          away_team_name_en: "Egypt",
+          home_score: "1",
+          away_score: "1",
+          finished: "TRUE",
+          time_elapsed: "finished",
+          home_penalties: "2",
+          away_penalties: "4",
+        }),
+      ],
+    });
+    const matches = normalizeProviderPayload(payload);
+
+    expect(matches).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          externalId: "74",
+          winner: "Paraguay",
+          penaltyScore: { home: 3, away: 4 },
+        }),
+        expect.objectContaining({
+          externalId: "75",
+          winner: "Morocco",
+          penaltyScore: { home: 2, away: 3 },
+        }),
+        expect.objectContaining({
+          externalId: "88",
+          winner: "Egypt",
+          penaltyScore: { home: 2, away: 4 },
+        }),
+      ]),
+    );
   });
 
   it("converts timezone-less local_date from source timezone into UTC and Kyiv time", () => {

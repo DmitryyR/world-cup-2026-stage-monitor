@@ -5,6 +5,7 @@ import type {
   TournamentStage,
   TournamentState,
 } from "@/domain/types";
+import { extractPenaltyScore } from "@/domain/penalty-score";
 import { prisma } from "./db";
 import type { AgentRunInput, PublishSnapshotInput, TournamentRepository } from "./repository";
 
@@ -68,7 +69,10 @@ export class PrismaTournamentRepository implements TournamentRepository {
       });
 
       logDbRead("getMatches", matches.length);
-      return matches.map((match) => ({
+      return matches.map((match) => {
+        const rawPayload = parseRawPayload(match.rawPayload);
+
+        return {
         externalId: match.externalId,
         stage: match.stage as TournamentStage,
         homeTeam: match.homeTeam,
@@ -78,8 +82,10 @@ export class PrismaTournamentRepository implements TournamentRepository {
         status: match.status as NormalizedMatch["status"],
         kickoffAt: match.kickoffAt.toISOString(),
         winner: match.winner,
-        rawPayload: parseRawPayload(match.rawPayload),
-      }));
+        penaltyScore: extractPenaltyScore(rawPayload),
+        rawPayload,
+      };
+      });
     } catch (error) {
       logDbFailure("getMatches", error);
       return [];
@@ -139,7 +145,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
             status: match.status,
             kickoffAt: new Date(match.kickoffAt),
             winner: match.winner,
-            rawPayload: match.rawPayload === undefined ? null : JSON.stringify(match.rawPayload),
+            rawPayload: serializeRawPayload(match),
           },
         }),
       ),
@@ -218,4 +224,26 @@ function parseRawPayload(value: string | null): unknown {
   } catch {
     return undefined;
   }
+}
+
+function serializeRawPayload(match: NormalizedMatch): string | null {
+  if (match.rawPayload === undefined && !match.penaltyScore) {
+    return null;
+  }
+
+  if (isRecord(match.rawPayload)) {
+    return JSON.stringify({
+      ...match.rawPayload,
+      ...(match.penaltyScore ? { penaltyScore: match.penaltyScore } : {}),
+    });
+  }
+
+  return JSON.stringify({
+    rawPayload: match.rawPayload,
+    ...(match.penaltyScore ? { penaltyScore: match.penaltyScore } : {}),
+  });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

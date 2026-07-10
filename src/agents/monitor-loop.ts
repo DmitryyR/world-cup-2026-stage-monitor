@@ -8,6 +8,7 @@ import type {
   RawProviderPayload,
   TournamentState,
 } from "@/domain/types";
+import { formatScore as formatDisplayScore } from "@/lib/format";
 import type { TournamentDataProvider } from "@/providers/provider";
 import type { TournamentRepository } from "@/lib/repository";
 
@@ -271,9 +272,7 @@ function formatMatchLabel(match: NormalizedMatch): string {
 }
 
 function formatScore(match: NormalizedMatch): string {
-  return match.homeScore === null || match.awayScore === null
-    ? "-"
-    : `${match.homeScore}-${match.awayScore}`;
+  return formatDisplayScore(match).replaceAll(" - ", "-");
 }
 
 export async function runMonitorWithPayload(
