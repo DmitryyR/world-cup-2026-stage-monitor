@@ -26,6 +26,7 @@ export function normalizeProviderPayload(
 
   const normalized = parsedPayload.matches.map((match) => {
     const stage = roundToStage[match.round.trim().toLowerCase()];
+    const sourceMatch = findRawProviderMatch(parsedPayload.rawProviderPayload, match.id);
 
     if (!stage) {
       throw new Error(`Unsupported match round: ${match.round}`);
@@ -41,8 +42,62 @@ export function normalizeProviderPayload(
       status: match.status,
       kickoffAt: match.kickoffAt,
       winner: match.winner ?? null,
+      ...(sourceMatch ? { rawPayload: sourceMatch } : {}),
     } satisfies NormalizedMatch;
   });
 
   return normalizedMatchesSchema.parse(normalized);
+}
+
+function findRawProviderMatch(rawProviderPayload: unknown, matchId: string): unknown | null {
+  const games = getRawGames(rawProviderPayload);
+
+  return (
+    games.find((game) => {
+      if (!isRecord(game)) {
+        return false;
+      }
+
+      return sameMatchId(game.id, matchId) || sameMatchId(game._id, matchId);
+    }) ?? null
+  );
+}
+
+function getRawGames(rawProviderPayload: unknown): unknown[] {
+  if (Array.isArray(rawProviderPayload)) {
+    return rawProviderPayload;
+  }
+
+  if (!isRecord(rawProviderPayload)) {
+    return [];
+  }
+
+  if (Array.isArray(rawProviderPayload.games)) {
+    return rawProviderPayload.games;
+  }
+
+  const response = rawProviderPayload.response;
+  if (isRecord(response) && Array.isArray(response.games)) {
+    return response.games;
+  }
+
+  return [];
+}
+
+function sameMatchId(left: unknown, right: string): boolean {
+  const leftValue = stringify(left);
+
+  return leftValue === right || extractDigits(leftValue) === extractDigits(right);
+}
+
+function extractDigits(value: string): string {
+  return value.match(/\d+/g)?.join("") ?? value;
+}
+
+function stringify(value: unknown): string {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

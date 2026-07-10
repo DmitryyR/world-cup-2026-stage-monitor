@@ -23,6 +23,7 @@ export const normalizedMatchSchema = z.object({
   status: matchStatusSchema,
   kickoffAt: z.string().datetime(),
   winner: z.string().min(1).nullable(),
+  rawPayload: z.unknown().optional(),
 });
 
 export const normalizedMatchesSchema = z.array(normalizedMatchSchema);

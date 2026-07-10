@@ -63,6 +63,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
           status: true,
           kickoffAt: true,
           winner: true,
+          rawPayload: true,
         },
       });
 
@@ -77,6 +78,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
         status: match.status as NormalizedMatch["status"],
         kickoffAt: match.kickoffAt.toISOString(),
         winner: match.winner,
+        rawPayload: parseRawPayload(match.rawPayload),
       }));
     } catch (error) {
       logDbFailure("getMatches", error);
@@ -203,5 +205,17 @@ function logDbFailure(method: string, error: unknown): void {
   if (process.env.NODE_ENV !== "production") {
     const message = error instanceof Error ? error.message : "unknown database error";
     console.warn(`[db] ${method} failed: ${message}`);
+  }
+}
+
+function parseRawPayload(value: string | null): unknown {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
   }
 }

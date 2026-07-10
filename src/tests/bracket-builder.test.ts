@@ -56,6 +56,44 @@ describe("bracket builder", () => {
     });
   });
 
+  it("resolves tied finished match from alternate provider penalty field names", () => {
+    const match = makeMatch({
+      homeTeam: "Australia",
+      awayTeam: "Egypt",
+      homeScore: 1,
+      awayScore: 1,
+      rawPayload: {
+        home_penalties: "3",
+        away_penalties: "5",
+      },
+    });
+
+    expect(resolveKnockoutOutcome(match)).toMatchObject({
+      winner: "Egypt",
+      winMethod: "penalties",
+      needsReview: false,
+    });
+  });
+
+  it("resolves tied finished match from provider side winner flags", () => {
+    const match = makeMatch({
+      homeTeam: "Switzerland",
+      awayTeam: "Colombia",
+      homeScore: 0,
+      awayScore: 0,
+      rawPayload: {
+        home_winner: false,
+        away_winner: true,
+      },
+    });
+
+    expect(resolveKnockoutOutcome(match)).toMatchObject({
+      winner: "Colombia",
+      winMethod: "unknown",
+      needsReview: false,
+    });
+  });
+
   it("resolves tied finished match from provider penalty note", () => {
     const match = makeMatch({
       homeTeam: "Netherlands",

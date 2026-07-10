@@ -493,8 +493,22 @@ function resolvePenaltyWinner(
   match: NormalizedMatch,
   rawMatch: Record<string, unknown> | null,
 ): { winner: string; homePenaltyScore: number; awayPenaltyScore: number } | null {
-  const homePenaltyScore = parseOptionalNumber(rawMatch?.home_penalty_score);
-  const awayPenaltyScore = parseOptionalNumber(rawMatch?.away_penalty_score);
+  const homePenaltyScore = parseFirstOptionalNumber(rawMatch, [
+    "home_penalty_score",
+    "home_penalties",
+    "home_penalty",
+    "home_penalty_goals",
+    "home_score_penalties",
+    "home_team_penalties",
+  ]);
+  const awayPenaltyScore = parseFirstOptionalNumber(rawMatch, [
+    "away_penalty_score",
+    "away_penalties",
+    "away_penalty",
+    "away_penalty_goals",
+    "away_score_penalties",
+    "away_team_penalties",
+  ]);
 
   if (homePenaltyScore === null || awayPenaltyScore === null || homePenaltyScore === awayPenaltyScore) {
     return null;
@@ -547,6 +561,11 @@ function resolveExplicitWinner(
     return match.winner;
   }
 
+  const sideWinner = resolveSideWinnerFlag(match, rawMatch);
+  if (sideWinner) {
+    return sideWinner;
+  }
+
   const candidateKeys = [
     "winner",
     "winner_team",
@@ -566,6 +585,38 @@ function resolveExplicitWinner(
     if (winner) {
       return winner;
     }
+  }
+
+  return null;
+}
+
+function resolveSideWinnerFlag(
+  match: NormalizedMatch,
+  rawMatch: Record<string, unknown> | null,
+): string | null {
+  const homeWinner = parseOptionalBoolean(
+    firstDefined(rawMatch, [
+      "home_winner",
+      "home_team_winner",
+      "home_qualified",
+      "home_team_qualified",
+    ]),
+  );
+  const awayWinner = parseOptionalBoolean(
+    firstDefined(rawMatch, [
+      "away_winner",
+      "away_team_winner",
+      "away_qualified",
+      "away_team_qualified",
+    ]),
+  );
+
+  if (homeWinner === true && awayWinner !== true) {
+    return match.homeTeam;
+  }
+
+  if (awayWinner === true && homeWinner !== true) {
+    return match.awayTeam;
   }
 
   return null;
@@ -786,6 +837,56 @@ function parseOptionalNumber(value: unknown): number | null {
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseFirstOptionalNumber(
+  value: Record<string, unknown> | null,
+  keys: string[],
+): number | null {
+  const rawValue = firstDefined(value, keys);
+
+  return parseOptionalNumber(rawValue);
+}
+
+function firstDefined(
+  value: Record<string, unknown> | null,
+  keys: string[],
+): unknown {
+  if (!value) {
+    return undefined;
+  }
+
+  return keys.map((key) => value[key]).find((entry) => entry !== undefined);
+}
+
+function parseOptionalBoolean(value: unknown): boolean | null {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    if (value === 1) {
+      return true;
+    }
+
+    if (value === 0) {
+      return false;
+    }
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+
+    if (["true", "1", "yes", "y"].includes(normalized)) {
+      return true;
+    }
+
+    if (["false", "0", "no", "n", ""].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return null;
 }
 
 function collectText(value: unknown): string[] {

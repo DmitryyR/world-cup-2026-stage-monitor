@@ -89,6 +89,32 @@ describe("worldcup26 mapper", () => {
     expect(match?.status).toBe("scheduled");
   });
 
+  it("preserves compact raw provider match evidence during normalization", () => {
+    const payload = mapWorldCup26ResponseToRawProviderPayload({
+      games: [
+        makeWorldCup26Game({
+          id: "88",
+          type: "r32",
+          home_team_name_en: "Australia",
+          away_team_name_en: "Egypt",
+          home_score: "1",
+          away_score: "1",
+          finished: "TRUE",
+          time_elapsed: "finished",
+          home_penalties: "3",
+          away_penalties: "5",
+        }),
+      ],
+    });
+    const [match] = normalizeProviderPayload(payload);
+
+    expect(match?.rawPayload).toMatchObject({
+      id: "88",
+      home_penalties: "3",
+      away_penalties: "5",
+    });
+  });
+
   it("converts timezone-less local_date from source timezone into UTC and Kyiv time", () => {
     const match = mapWorldCup26GameToRawProviderMatch(
       makeWorldCup26Game({
